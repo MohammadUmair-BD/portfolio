@@ -30,7 +30,7 @@ npm run dev                  # http://localhost:3000
 1. Push this repo to GitHub.
 2. In Vercel, choose **Add New → Project**, import the repo, and keep the defaults (it detects Next.js).
 3. Optional: in **Storage**, add a **Neon** Postgres database (free tier). Vercel sets `DATABASE_URL` for you. The tables are created automatically on first use.
-4. In **Settings → Environment Variables**, add `ADMIN_PASSWORD` (12+ characters) and `SITE_URL` (your Vercel URL). Add `PROFILE_PHONE` only if you turn the phone on.
+4. In **Settings → Environment Variables**, add `ADMIN_PASSWORD` (12+ characters) and `SITE_URL` (your Vercel URL).
 5. Redeploy. Every later `git push` deploys automatically.
 
 ## Updating your resume data (re-import)
@@ -43,9 +43,10 @@ All site content, the chat answers and the PDF come from **`data/profile.json`**
 
 Useful switches inside `profile.json`:
 
-- `site.showPhone`: shows your phone number (set `PROFILE_PHONE` too). Off by default.
+- `site.showPhone`: shows the `phone` number on the site, in the chat and in the PDF. Set it to `false` to hide the number everywhere.
+- `site.pronouns`: how the cat refers to you (currently he/him/his). Remove it to have the cat always use your first name.
 - `site.catName`: the cat's name.
-- `availability`, `workPreferences`: leave `null` and the cat says it doesn't know. Fill them in, for example `"availability": "Available from November 2026."` or `"workPreferences": { "remote": "Open to remote roles." }`, and the cat will answer.
+- `availability`, `workPreferences.remote`, `workPreferences.relocation`: what the cat says when asked "is he available?", "remote?" or "would he relocate?". Set any of them to `null` and the cat says it doesn't know instead of guessing.
 - `links.linkedin`, `links.github`: shown on the site and in the chat when filled in.
 
 There is deliberately no resume-upload page. On serverless hosting, uploaded files don't persist, and editing one JSON file is simpler and reviewable in git.

@@ -1,4 +1,4 @@
-import type { Profile } from "@/lib/profile-shared";
+import { voice, type Profile } from "@/lib/profile-shared";
 import { FOCUS, type CameraView, type ObjectId } from "@/lib/scene-layout";
 
 export type TourStep = { target: ObjectId; line: string; camera: CameraView };
@@ -10,7 +10,7 @@ const list = (items: string[]) => (items.length < 2 ? items.join("") : `${items.
  * pulled from the profile so nothing is made up.
  */
 export function buildTour(p: Profile): TourStep[] {
-  const first = p.name.split(" ").at(-1) ?? p.name;
+  const { first, his, him, He, His } = voice(p);
   const laravelClients = p.projects.filter((x) => x.kind === "client" && x.tech.includes("Laravel")).map((x) => x.title);
   const latest = p.experience[0];
   const coreSkills = p.skills.filter((s) => s.category !== "familiar").slice(0, 3).map((s) => s.name);
@@ -24,27 +24,29 @@ export function buildTour(p: Profile): TourStep[] {
     },
     {
       target: "bookshelf",
-      line: `Every book on this shelf is one of ${first}'s skills, ${p.skills.length} in all, starting with ${list(coreSkills)}.`,
+      line: `Every book on this shelf is one of ${his} skills, ${p.skills.length} in all, starting with ${list(coreSkills)}.`,
       camera: FOCUS.bookshelf,
     },
     {
       target: "certificates",
-      line: `These frames are ${first}'s journey: ${p.experience.length} roles, most recently ${latest.role} at ${latest.company}${degree ? `, plus a ${degree.degree}` : ""}.`,
+      line: `These frames are ${his} journey: ${p.experience.length} roles, most recently ${latest.role} at ${latest.company}${degree ? `, plus a ${degree.degree}` : ""}.`,
       camera: FOCUS.certificates,
     },
     {
       target: "window",
-      line: `My favourite spot. Look out here to learn who ${first} is. We're in ${p.location}.`,
+      line: `My favourite spot. Look out here to learn who ${first} is. ${He} is based in ${p.location}.`,
       camera: FOCUS.window,
     },
     {
       target: "resume",
-      line: `Prefer paper? ${first}'s resume is right here, ready to download.`,
+      line: `Prefer paper? ${His} resume is right here, ready to download.`,
       camera: FOCUS.resume,
     },
     {
       target: "phone",
-      line: `Like what you see? Ring ${first} up. Email works best: ${p.email}.`,
+      line: p.phone
+        ? `Like what you see? Ring ${him} up at ${p.phone}, or email ${p.email}.`
+        : `Like what you see? Ring ${him} up. Email works best: ${p.email}.`,
       camera: FOCUS.phone,
     },
   ];

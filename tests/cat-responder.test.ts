@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { RuleBasedResponder } from "@/lib/cat/rule-responder";
 import { profile } from "@/lib/profile";
-import type { Profile } from "@/lib/profile-shared";
 
 const cat = new RuleBasedResponder(profile);
 const ask = (q: string) => cat.respond(q);
@@ -113,19 +112,58 @@ describe("answers come from data", () => {
   });
 
   it("falls back for remote and availability questions when the profile doesn't say", () => {
-    expect(ask("is he open to remote work?").intent).toBe("fallback");
-    expect(ask("is she available?").intent).toBe("fallback");
+    const c = new RuleBasedResponder({ ...profile, availability: null, workPreferences: null });
+    expect(c.respond("is he open to remote work?").intent).toBe("fallback");
+    expect(c.respond("is she available?").intent).toBe("fallback");
   });
 
-  it("answers availability and remote when the profile provides them", () => {
-    const withPrefs: Profile = { ...profile, availability: "Available immediately.", workPreferences: { remote: "Open to remote roles." } };
-    const c = new RuleBasedResponder(withPrefs);
-    expect(c.respond("is he available").text).toBe("Available immediately.");
-    expect(c.respond("remote?").text).toContain("Open to remote roles.");
+  it("falls back on relocation if only remote is known", () => {
+    const c = new RuleBasedResponder({ ...profile, workPreferences: { remote: "Remote is fine." } });
+    expect(c.respond("would he relocate?").intent).toBe("fallback");
   });
 
-  it("never shows the phone number unless enabled", () => {
-    expect(ask("phone number").text).not.toContain("316");
+  it("answers availability, including start times", () => {
+    for (const q of ["is he available?", "when can he start?", "notice period?", "can he join immediately"]) {
+      const r = ask(q);
+      expect(r.intent, q).toBe("availability");
+      expect(r.text).toContain("start immediately on remote roles");
+    }
+  });
+
+  it("answers remote and on-site questions without the relocation part", () => {
+    for (const q of ["is he open to remote work?", "can he work remotely?", "would he work on site?", "hybrid ok?"]) {
+      const r = ask(q);
+      expect(r.intent, q).toBe("location");
+      expect(r.text).toContain("open to remote, hybrid or on-site");
+      expect(r.text).not.toContain("Gulf");
+    }
+  });
+
+  it("answers relocation questions", () => {
+    for (const q of ["would he relocate?", "can he move to Dubai", "is he open to working in the gulf", "would he relocate to karachi"]) {
+      const r = ask(q);
+      expect(r.intent, q).toBe("location");
+      expect(r.text).toContain("Karachi or Islamabad");
+      expect(r.text).toContain("Gulf");
+    }
+  });
+
+  it("shows the phone number because it is enabled", () => {
+    expect(ask("phone number").text).toContain(profile.phone!);
+  });
+});
+
+describe("pronouns", () => {
+  it("uses he/him/his from the profile", () => {
+    expect(cat.suggestions).toContain("What are his skills?");
+    expect(cat.suggestions).toContain("How do I contact him?");
+    expect(ask("salary expectations").text).toContain("reach him at");
+  });
+
+  it("uses the first name when no pronouns are set", () => {
+    const c = new RuleBasedResponder({ ...profile, site: { ...profile.site, pronouns: undefined } });
+    expect(c.suggestions).toContain("What are Umair's skills?");
+    expect(c.respond("salary").text).toContain("reach Umair at");
   });
 });
 

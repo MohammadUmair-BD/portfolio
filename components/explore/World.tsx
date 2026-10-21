@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type * as THREE from "three";
-import type { Profile } from "@/lib/profile-shared";
+import { voice, type Profile } from "@/lib/profile-shared";
 import {
   CAT_SPOTS, DESK_TOP, FOCUS, LAYOUT, OBJECT_SECTION, OVERVIEW, SECTION_LABELS, SECTION_OBJECT,
   type CameraView, type ObjectId, type SectionId,
@@ -435,7 +435,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
       </nav>
 
       {section && <Overlay section={section} profile={profile} onClose={closeSection} />}
-      {chatOpen && <Chat catName={catName} firstName={first} onClose={() => setChatOpen(false)} />}
+      {chatOpen && <Chat catName={catName} firstName={first} voice={voice(profile)} onClose={() => setChatOpen(false)} />}
     </div>
   );
 }

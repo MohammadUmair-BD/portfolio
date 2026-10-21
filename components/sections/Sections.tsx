@@ -24,6 +24,24 @@ export function About({ profile }: P) {
         <dd>{profile.location}</dd>
         <dt className="text-ink-soft">Languages</dt>
         <dd>{profile.languages.map((l) => `${l.name} (${l.level})`).join(" · ")}</dd>
+        {profile.availability && (
+          <>
+            <dt className="text-ink-soft">Availability</dt>
+            <dd>{profile.availability}</dd>
+          </>
+        )}
+        {profile.workPreferences?.remote && (
+          <>
+            <dt className="text-ink-soft">Work style</dt>
+            <dd>{profile.workPreferences.remote}</dd>
+          </>
+        )}
+        {profile.workPreferences?.relocation && (
+          <>
+            <dt className="text-ink-soft">Relocation</dt>
+            <dd>{profile.workPreferences.relocation}</dd>
+          </>
+        )}
       </dl>
     </div>
   );

@@ -34,7 +34,13 @@ export type Profile = {
   links: { linkedin: string; github: string; website: string };
   availability: string | null;
   workPreferences: { remote?: string; relocation?: string } | null;
-  site: { catName: string; showPhone: boolean; resumeFile: string };
+  site: {
+    catName: string;
+    /** How the cat refers to the person. Leave out to always use the first name. */
+    pronouns?: { subject: string; object: string; possessive: string };
+    showPhone: boolean;
+    resumeFile: string;
+  };
   skills: Skill[];
   familiarNote: string;
   experience: Experience[];
@@ -43,6 +49,24 @@ export type Profile = {
   certifications: Certification[];
   languages: { name: string; level: string }[];
 };
+
+/**
+ * Words the cat uses for the person: he/him/his from site.pronouns, or the
+ * first name everywhere if no pronouns are set (never guessed).
+ */
+export function voice(p: Profile) {
+  const first = p.name.split(" ").at(-1) ?? p.name;
+  const pr = p.site.pronouns;
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  return {
+    first,
+    he: pr?.subject ?? first,
+    him: pr?.object ?? first,
+    his: pr?.possessive ?? `${first}'s`,
+    He: cap(pr?.subject ?? first),
+    His: cap(pr?.possessive ?? `${first}'s`),
+  };
+}
 
 export const CATEGORY_LABELS: Record<SkillCategory, string> = {
   backend: "Backend",

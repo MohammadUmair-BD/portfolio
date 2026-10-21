@@ -13,8 +13,7 @@ const full = raw as unknown as Profile;
  */
 export const profile: Profile = {
   ...full,
-  // The number itself lives in the PROFILE_PHONE env var so it never sits in git.
-  phone: full.site.showPhone ? process.env.PROFILE_PHONE || full.phone || null : null,
+  phone: full.site.showPhone ? full.phone || null : null,
   experience: [...full.experience].sort((a, b) => (b.start > a.start ? 1 : -1)),
 };
 

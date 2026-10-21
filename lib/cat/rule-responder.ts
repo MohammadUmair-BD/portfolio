@@ -1,6 +1,6 @@
 import { SKILL_ALIASES } from "@/config/skill-aliases";
 import { RELATED_SKILLS } from "@/config/skill-related";
-import { formatRange, monthsOfExperience, skillsByCategory, type Profile } from "@/lib/profile-shared";
+import { formatRange, monthsOfExperience, skillsByCategory, voice, type Profile } from "@/lib/profile-shared";
 import { contentTokens, editDistance, hasPhrase, normalize, wordMatches } from "./text";
 import type { CatLink, CatReply, CatResponder, CustomAnswer } from "./types";
 
@@ -15,8 +15,8 @@ const INTENTS: IntentDef[] = [
   { name: "salary", phrases: [["salary expectations", 6], ["how much", 3], ["expected salary", 6]], keywords: [["salary", 5], ["compensation", 5], ["ctc", 4], ["rate", 2], ["rates", 2], ["pay", 2], ["hourly", 3], ["budget", 2], ["charge", 2], ["cost", 2], ["price", 2], ["expectations", 2]] },
   { name: "current_role", phrases: [["current job", 6], ["current role", 6], ["current company", 6], ["work now", 5], ["working now", 5], ["right now", 3], ["latest job", 5], ["most recent", 4], ["last job", 5], ["recent role", 5]], keywords: [["currently", 3], ["present", 2]] },
   { name: "years_experience", phrases: [["how many years", 6], ["years of experience", 6], ["how long", 3], ["how experienced", 4]], keywords: [["years", 2], ["senior", 2], ["junior", 2]] },
-  { name: "availability", phrases: [["notice period", 6], ["open to work", 5], ["when can", 3], ["looking for", 3]], keywords: [["available", 4], ["availability", 4], ["notice", 3], ["freelance", 3], ["join", 2]] },
-  { name: "location", phrases: [["where is he", 3], ["where is she", 3], ["where are they", 3], ["where does he live", 5], ["where is he from", 5], ["time zone", 4]], keywords: [["located", 4], ["location", 4], ["based", 3], ["live", 2], ["lives", 2], ["city", 3], ["country", 3], ["remote", 4], ["relocate", 4], ["relocation", 4], ["onsite", 3], ["hybrid", 3], ["timezone", 4], ["where", 1]] },
+  { name: "availability", phrases: [["notice period", 6], ["open to work", 5], ["when can", 3], ["looking for", 3], ["start date", 6], ["can he start", 6], ["can start", 4]], keywords: [["available", 4], ["availability", 4], ["notice", 3], ["freelance", 3], ["join", 2], ["joining", 3], ["start", 2], ["immediately", 3]] },
+  { name: "location", phrases: [["where is he", 3], ["where is she", 3], ["where are they", 3], ["where does he live", 5], ["where is he from", 5], ["time zone", 4], ["work from home", 5], ["on site", 4]], keywords: [["located", 4], ["location", 4], ["based", 3], ["live", 2], ["lives", 2], ["city", 3], ["country", 3], ["remote", 4], ["relocate", 4], ["relocation", 4], ["onsite", 3], ["hybrid", 3], ["timezone", 4], ["where", 1], ["wfh", 4], ["remotely", 4], ["move", 2], ["moving", 2], ["abroad", 4], ["gulf", 4], ["dubai", 3], ["uae", 3], ["saudi", 3], ["qatar", 3], ["ksa", 3], ["karachi", 2], ["islamabad", 2]] },
   { name: "languages", phrases: [["spoken languages", 6], ["languages does", 4], ["languages he speaks", 6]], keywords: [["speak", 3], ["speaks", 3], ["english", 3], ["urdu", 3], ["spoken", 3]] },
   { name: "resume", phrases: [["download resume", 6], ["download cv", 6]], keywords: [["cv", 4], ["resume", 4], ["pdf", 2], ["download", 2]] },
   { name: "contact", phrases: [["get in touch", 5], ["reach out", 4], ["talk to", 3], ["phone number", 5]], keywords: [["contact", 4], ["email", 4], ["mail", 3], ["reach", 2], ["hire", 4], ["hiring", 3], ["linkedin", 3], ["phone", 3], ["whatsapp", 3], ["call", 2], ["number", 1], ["interview", 3]] },
@@ -45,18 +45,21 @@ const GENERIC_TITLE_WORDS = new Set(["system", "platform", "smart", "contract", 
 
 export class RuleBasedResponder implements CatResponder {
   private readonly first: string;
+  /** he/him/his from the profile, or the first name if no pronouns are set. */
+  private readonly v: ReturnType<typeof voice>;
   private readonly aliases: Map<string, string>;
 
   constructor(private readonly p: Profile) {
     this.first = p.name.split(" ").at(-1) ?? p.name;
+    this.v = voice(p);
     this.aliases = new Map(Object.entries(SKILL_ALIASES));
     for (const s of p.skills) this.aliases.set(s.name.toLowerCase(), s.name);
     for (const proj of p.projects) for (const t of proj.tech) this.aliases.set(t.toLowerCase(), t);
   }
 
   get suggestions(): string[] {
-    const f = this.first;
-    return [`What are ${f}'s skills?`, `Does ${f} know Laravel?`, `Where has ${f} worked?`, "Show me projects", `How do I contact ${f}?`];
+    const { his, he, him } = this.v;
+    return [`What are ${his} skills?`, `Does ${he} know Laravel?`, `Where has ${he} worked?`, "Show me projects", `How do I contact ${him}?`];
   }
 
   respond(question: string, customAnswers: CustomAnswer[] = []): CatReply {
@@ -193,12 +196,12 @@ export class RuleBasedResponder implements CatResponder {
 
   private readonly replies: Record<string, () => CatReply> = {
     greeting: () =>
-      this.reply("greeting", `Hi there! 🐾 I'm ${this.p.site.catName}, ${this.first}'s assistant. Ask me anything about ${this.first}'s work.`, [], this.suggestions.slice(0, 3)),
+      this.reply("greeting", `Hi there! 🐾 I'm ${this.p.site.catName}, ${this.first}'s assistant. Ask me anything about ${this.v.his} work.`, [], this.suggestions.slice(0, 3)),
 
     about: () => this.reply("about", `${this.p.name}, ${this.p.headline}. ${this.p.summary}`, [{ label: "Quick view", href: "/quick" }]),
 
     about_cat: () =>
-      this.reply("about_cat", `I'm ${this.p.site.catName}, ${this.first}'s cat and tour guide. *purr* I'm a simple rule-based helper, not an AI, and every answer comes from ${this.first}'s resume.`, [], this.suggestions.slice(0, 3)),
+      this.reply("about_cat", `I'm ${this.p.site.catName}, ${this.first}'s cat and tour guide. *purr* I'm a simple rule-based helper, not an AI, and every answer comes from ${this.v.his} resume.`, [], this.suggestions.slice(0, 3)),
 
     skills_overview: () => {
       const lines = skillsByCategory(this.p).map((g) => `${g.label}: ${g.skills.map((s) => s.name).join(", ")}`);
@@ -251,22 +254,27 @@ export class RuleBasedResponder implements CatResponder {
       this.p.availability ? this.reply("availability", this.p.availability, this.contactLinks()) : this.fallback(),
 
     salary: () =>
-      this.reply("salary", `That's best discussed with ${this.first} directly, since it depends on the role. You can reach ${this.first} at ${this.p.email}.`, this.contactLinks()),
+      this.reply("salary", `That's best discussed with ${this.first} directly, since it depends on the role. You can reach ${this.v.him} at ${this.p.email}.`, this.contactLinks()),
 
-    thanks: () => this.reply("thanks", `You're welcome! *purr* If you'd like to talk to ${this.first}, email ${this.p.email}.`, this.contactLinks()),
+    thanks: () => this.reply("thanks", `You're welcome! *purr* If you'd like to talk to ${this.v.him}, email ${this.p.email}.`, this.contactLinks()),
 
     bye: () => this.reply("bye", `Bye for now! 🐾 ${this.first} is at ${this.p.email} if you want to get in touch.`, this.contactLinks()),
   };
 
   private location(q: string, tokens: string[]): CatReply {
-    const asksRemote = tokens.some((t) => ["remote", "relocate", "relocation", "onsite", "hybrid"].includes(t) || wordMatches(t, "relocate"));
-    if (asksRemote) {
-      const prefs = this.p.workPreferences;
-      if (!prefs) return this.fallback();
-      const parts = [prefs.remote, prefs.relocation].filter(Boolean).join(" ");
-      return this.reply("location", `${this.first} is based in ${this.p.location}. ${parts}`, this.contactLinks());
-    }
-    return this.reply("location", `${this.first} is based in ${this.p.location}.`);
+    const has = (words: string[]) => tokens.some((t) => words.includes(t));
+    const asksRemote = has(["remote", "remotely", "onsite", "hybrid", "wfh", "office"]) || hasPhrase(q, "on site") || hasPhrase(q, "work from home");
+    const asksRelocation =
+      has(["relocate", "relocation", "move", "moving", "abroad", "gulf", "dubai", "uae", "saudi", "qatar", "ksa", "karachi", "islamabad"]) ||
+      tokens.some((t) => wordMatches(t, "relocate"));
+    const based = `${this.first} is based in ${this.p.location}.`;
+    if (!asksRemote && !asksRelocation) return this.reply("location", based);
+
+    // Only answer what the profile actually says; otherwise admit it.
+    const prefs = this.p.workPreferences;
+    const parts = [asksRemote && prefs?.remote, asksRelocation && prefs?.relocation];
+    if (parts.some((part, i) => [asksRemote, asksRelocation][i] && !part)) return this.fallback();
+    return this.reply("location", [based, ...parts.filter(Boolean)].join(" "), this.contactLinks());
   }
 
   private skillCheck(terms: string[]): CatReply {
@@ -311,7 +319,7 @@ export class RuleBasedResponder implements CatResponder {
   private skillMissing(terms: string[]): CatReply {
     const what = terms.join(" or ");
     return {
-      ...this.reply("skill_check", `I don't see ${what} in ${this.first}'s profile, so I can't confirm that experience. You can ask directly at ${this.p.email}.`, [this.emailLink()], this.suggestions.slice(0, 3)),
+      ...this.reply("skill_check", `I don't see ${what} in ${this.first}'s profile, so I can't confirm that experience. You can ask ${this.v.him} directly at ${this.p.email}.`, [this.emailLink()], this.suggestions.slice(0, 3)),
     };
   }
 

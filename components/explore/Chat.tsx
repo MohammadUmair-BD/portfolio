@@ -9,12 +9,14 @@ const MAX = 300;
 /** A short "typing…" pause of 400–700 ms so replies feel natural. */
 const typingPause = () => new Promise((r) => setTimeout(r, 400 + Math.random() * 300));
 
-export function Chat({ catName, firstName, onClose }: { catName: string; firstName: string; onClose: () => void }) {
+type Voice = { he: string; him: string; his: string };
+
+export function Chat({ catName, firstName, voice, onClose }: { catName: string; firstName: string; voice: Voice; onClose: () => void }) {
   const chips = [
-    { label: "Skills", q: `What are ${firstName}'s skills?` },
-    { label: "Experience", q: `Where has ${firstName} worked?` },
+    { label: "Skills", q: `What are ${voice.his} skills?` },
+    { label: "Experience", q: `Where has ${voice.he} worked?` },
     { label: "Projects", q: "Show me projects" },
-    { label: "Contact", q: `How do I contact ${firstName}?` },
+    { label: "Contact", q: `How do I contact ${voice.him}?` },
     { label: "Download resume", q: "Download resume" },
   ];
   const [messages, setMessages] = useState<Message[]>([
@@ -121,7 +123,7 @@ export function Chat({ catName, firstName, onClose }: { catName: string; firstNa
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           maxLength={MAX}
-          placeholder={`e.g. Does ${firstName} know Laravel?`}
+          placeholder={`e.g. Does ${voice.he} know Laravel?`}
           className="min-w-0 flex-1 rounded-full border border-line bg-card px-4 py-2 text-sm outline-none focus:border-accent"
         />
         <button type="submit" disabled={!draft.trim() || typing} className="rounded-full bg-ink px-4 text-sm font-medium text-paper disabled:opacity-50">

@@ -3,18 +3,22 @@
   "headline": "Full-Stack Developer (Laravel / PHP)",
   "location": "Peshawar, Pakistan",
   "email": "mohammadumaiir22@gmail.com",
-  "phone": "",
+  "phone": "+92 316-8080190",
   "summary": "Laravel developer who's shipped production systems for UAE healthcare, hospitality, trading, and interior-design clients — from zero to live in weeks, not quarters. Backend-strong (APIs, SOLID architecture, MySQL), frontend-capable across React/Inertia.js and HTML5/CSS3/Ajax, and currently closing the gap into Vue.js/Angular through applied, AI-assisted builds.",
   "links": {
-    "linkedin": "",
+    "linkedin": "https://www.linkedin.com/in/umairkhan3",
     "github": "",
     "website": ""
   },
-  "availability": null,
-  "workPreferences": null,
+  "availability": "Yes, Umair is available for new roles. He can start immediately on remote roles; for on-site roles in Karachi or Islamabad he needs about 2–3 weeks.",
+  "workPreferences": {
+    "remote": "He is open to remote, hybrid or on-site roles.",
+    "relocation": "Within Pakistan he can relocate to Karachi or Islamabad (only those two cities), and outside Pakistan he is open to any Gulf country."
+  },
   "site": {
     "catName": "Miso",
-    "showPhone": false,
+    "pronouns": { "subject": "he", "object": "him", "possessive": "his" },
+    "showPhone": true,
     "resumeFile": "/Muhammad_Umair_Resume.pdf"
   },
   "skills": [

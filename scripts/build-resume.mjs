@@ -17,7 +17,7 @@ const bold = (s) => esc(s).replace(/(Laravel \+ Filament|React\/Inertia\.js|Word
 
 const contact = [
   esc(p.location),
-  p.site.showPhone && (process.env.PROFILE_PHONE || p.phone) ? esc(process.env.PROFILE_PHONE || p.phone) : null,
+  p.site.showPhone && p.phone ? esc(p.phone) : null,
   `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>`,
   p.links.linkedin ? `<a href="${esc(p.links.linkedin)}">LinkedIn</a>` : null,
   p.links.github ? `<a href="${esc(p.links.github)}">GitHub</a>` : null,
