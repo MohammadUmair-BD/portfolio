@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { About, Contact, Projects, ResumeButton, SectionHeading, Skills, Timeline } from "@/components/sections/Sections";
+import { BackToTop } from "@/components/BackToTop";
 import { FallbackNotice } from "@/components/FallbackNotice";
 import { profile } from "@/lib/profile";
 import { jsonForScript } from "@/lib/security";
@@ -48,9 +49,9 @@ export default function QuickView() {
         </Link>
       </nav>
 
-      <header className="pb-10 pt-12">
+      <header id="intro" className="pb-10 pt-12">
         <p className="text-sm font-medium uppercase tracking-widest text-accent">{profile.location}</p>
-        <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">{profile.name}</h1>
+        <h1 id="top" tabIndex={-1} className="mt-2 font-display outline-none text-4xl font-semibold tracking-tight sm:text-5xl">{profile.name}</h1>
         <p className="mt-2 text-xl text-ink-soft">{profile.headline}</p>
         <div className="no-print mt-6 flex flex-wrap gap-3">
           <ResumeButton profile={profile} />
@@ -59,12 +60,14 @@ export default function QuickView() {
       </header>
 
       <main className="space-y-16">
-        <section aria-labelledby="about" className="scroll-mt-20 space-y-4"><SectionHeading id="about">About</SectionHeading><About profile={profile} /></section>
+        <section id="about-section" aria-labelledby="about" className="scroll-mt-20 space-y-4"><SectionHeading id="about">About</SectionHeading><About profile={profile} /></section>
         <section aria-labelledby="experience" className="scroll-mt-20 space-y-4"><SectionHeading id="experience">Experience & education</SectionHeading><Timeline profile={profile} /></section>
         <section aria-labelledby="projects" className="scroll-mt-20 space-y-4"><SectionHeading id="projects">Projects</SectionHeading><Projects profile={profile} /></section>
         <section aria-labelledby="skills" className="scroll-mt-20 space-y-4"><SectionHeading id="skills">Skills</SectionHeading><Skills profile={profile} /></section>
         <section aria-labelledby="contact" className="scroll-mt-20 space-y-4"><SectionHeading id="contact">Contact</SectionHeading><Contact profile={profile} /></section>
       </main>
+
+      <BackToTop topId="top" desktopAfterId="intro" phoneAfterId="about-section" />
     </div>
   );
 }
