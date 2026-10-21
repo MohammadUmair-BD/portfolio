@@ -162,7 +162,7 @@ export function ContactLinks({ profile }: P) {
   const links = [
     { label: "Email", value: profile.email, href: `mailto:${profile.email}` },
     profile.phone && { label: "Phone", value: profile.phone, href: `tel:${profile.phone.replace(/[^\d+]/g, "")}` },
-    profile.links.linkedin && { label: "LinkedIn", value: "LinkedIn profile", href: profile.links.linkedin },
+    profile.links.linkedin && { label: "LinkedIn", value: "Mohammad Umair", href: profile.links.linkedin },
     profile.links.github && { label: "GitHub", value: "GitHub profile", href: profile.links.github },
     profile.links.website && { label: "Website", value: profile.links.website, href: profile.links.website },
   ].filter(Boolean) as { label: string; value: string; href: string }[];
