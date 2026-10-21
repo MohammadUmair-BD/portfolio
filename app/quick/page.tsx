@@ -3,6 +3,7 @@ import Link from "next/link";
 import { About, Contact, Projects, ResumeButton, SectionHeading, Skills, Timeline } from "@/components/sections/Sections";
 import { FallbackNotice } from "@/components/FallbackNotice";
 import { profile } from "@/lib/profile";
+import { jsonForScript } from "@/lib/security";
 
 export const metadata: Metadata = {
   title: "Quick view",
@@ -31,7 +32,7 @@ export default function QuickView() {
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(jsonLd) }} />
 
       <FallbackNotice />
 

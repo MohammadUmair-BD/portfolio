@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CatLink, CatReply } from "@/lib/cat/types";
+import { isSafeHref } from "@/lib/security";
 
 type Message = { from: "cat" | "you"; text: string; links?: CatLink[]; suggestions?: string[] };
 
@@ -58,7 +59,7 @@ export function Chat({ catName, firstName, voice, onClose, onReply }: {
         typingPause(),
       ]);
       const data = (await res.json()) as CatReply & { error?: string };
-      reply = res.ok ? { from: "cat", text: data.text, links: data.links, suggestions: data.suggestions } : { from: "cat", text: data.error ?? "Hmm, something went wrong." };
+      reply = res.ok ? { from: "cat", text: data.text, links: data.links?.filter((l) => isSafeHref(l.href)), suggestions: data.suggestions } : { from: "cat", text: data.error ?? "Hmm, something went wrong." };
     } catch {
       reply = { from: "cat", text: "I couldn't reach the server. Check your connection and try again." };
     }

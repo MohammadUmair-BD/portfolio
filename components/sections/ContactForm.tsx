@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Status = { kind: "idle" | "sending" | "sent" } | { kind: "error"; message: string; fields?: Record<string, string> };
 
 export function ContactForm({ email }: { email: string }) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const startedAt = useRef(0); // when the form appeared; the server rejects instant (bot) submissions
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -15,7 +19,7 @@ export function ContactForm({ email }: { email: string }) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        body: JSON.stringify({ ...Object.fromEntries(new FormData(form)), startedAt: startedAt.current }),
       });
       const data = await res.json();
       if (res.ok) {

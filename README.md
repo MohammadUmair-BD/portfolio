@@ -97,6 +97,29 @@ To use a rigged `.glb`:
 2. Create `CatGLB.tsx`. Load the model with `GLTFLoader` from `three/examples/jsm/loaders/GLTFLoader.js`, and drive its `AnimationMixer` from `brain.state` (map each state to a clip), copying `brain.position` and `brain.heading` onto the model each frame.
 3. Render `<CatGLB brain={brain} … />` instead of `<Cat … />` in `components/explore/World.tsx`.
 
+## Security
+
+- **Injection:**
+  - The contact form, chat and admin answers reject HTML tags, `javascript:`/`data:` URLs and encoded variants of them (`lib/security.ts`).
+  - Input is normalized and stripped of invisible control characters.
+  - React escapes all output, and every SQL query is parameterized.
+- **Requests:**
+  - The APIs accept only small JSON bodies.
+  - Cross-site requests (another website posting to yours) are refused.
+  - Rate limits apply per IP: chat 30/min, contact 5/min.
+  - Bot submissions are dropped silently, using a hidden field plus a minimum fill time.
+- **Admin:**
+  - The password must be 12+ characters and is compared in constant time.
+  - 5 wrong passwords lock that IP out for 15 minutes.
+  - Responses are never cached, and the page isn't indexed.
+- **Headers:** set in `next.config.ts`:
+  - A Content Security Policy where everything loads from this site only, and no framing.
+  - `nosniff`, a strict referrer policy, HSTS and a locked-down Permissions-Policy.
+  - No `X-Powered-By`.
+  - If you later show project images hosted elsewhere, add their domain to `img-src` in the CSP.
+- **Errors** return generic messages. Details go to the server log only.
+- **Tests:** `tests/security.test.ts` sends real attack payloads to every endpoint.
+
 ## Privacy and accessibility notes
 
 - Visitor memory (visited, tour done, last section) lives only in `localStorage`. There's no tracking or cookies.
