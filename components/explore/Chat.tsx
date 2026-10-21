@@ -11,7 +11,14 @@ const typingPause = () => new Promise((r) => setTimeout(r, 400 + Math.random() *
 
 type Voice = { he: string; him: string; his: string };
 
-export function Chat({ catName, firstName, voice, onClose }: { catName: string; firstName: string; voice: Voice; onClose: () => void }) {
+export function Chat({ catName, firstName, voice, onClose, onReply }: {
+  catName: string;
+  firstName: string;
+  voice: Voice;
+  onClose: () => void;
+  /** Called when an answer arrives, so the cat can "talk" it. */
+  onReply?: () => void;
+}) {
   const chips = [
     { label: "Skills", q: `What are ${voice.his} skills?` },
     { label: "Experience", q: `Where has ${voice.he} worked?` },
@@ -28,6 +35,12 @@ export function Chat({ catName, firstName, voice, onClose }: { catName: string; 
   const list = useRef<HTMLDivElement>(null);
 
   useEffect(() => input.current?.focus(), []);
+  // Esc closes the chat wherever focus is (sending disables the Ask button, which drops focus).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
   useEffect(() => {
     list.current?.scrollTo({ top: list.current.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
@@ -51,12 +64,13 @@ export function Chat({ catName, firstName, voice, onClose }: { catName: string; 
     }
     setTyping(false);
     setMessages((m) => [...m, reply]);
+    onReply?.();
+    input.current?.focus();
   }
 
   return (
     <section
       aria-label={`Chat with ${catName}`}
-      onKeyDown={(e) => e.key === "Escape" && onClose()}
       className="fixed inset-x-2 bottom-2 z-20 flex max-h-[75dvh] flex-col overflow-hidden rounded-2xl border border-line bg-paper shadow-2xl sm:inset-x-auto sm:bottom-24 sm:right-6 sm:w-[380px]"
     >
       <header className="flex items-center gap-2 border-b border-line px-4 py-3">
@@ -102,7 +116,7 @@ export function Chat({ catName, firstName, voice, onClose }: { catName: string; 
         )}
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto px-4 pb-2">
+      <div className="flex flex-wrap gap-1.5 px-4 pb-2">
         {chips.map((c) => (
           <button key={c.label} onClick={() => ask(c.q)} className="shrink-0 rounded-full border border-line px-3 py-1 text-xs hover:border-accent hover:text-accent">
             {c.label}

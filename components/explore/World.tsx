@@ -5,10 +5,11 @@ import gsap from "gsap";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Vector3 } from "three";
 import type * as THREE from "three";
 import { voice, type Profile } from "@/lib/profile-shared";
 import {
-  CAT_SPOTS, DESK_TOP, FOCUS, LAYOUT, OBJECT_SECTION, OUTSIDE, OVERVIEW, SECTION_LABELS, SECTION_OBJECT,
+  CAT_SPOTS, DESK_TOP, FOCUS, LAYOUT, OBJECT_SECTION, OUTSIDE, OVERVIEW, SECTION_LABELS, SECTION_OBJECT, STAND,
   type CameraView, type ObjectId, type SectionId,
 } from "@/lib/scene-layout";
 import { buildTour } from "@/lib/tour";
@@ -178,6 +179,40 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
 
   const viewPosition = (cv: CameraView | null) => (cv ?? OVERVIEW).position;
 
+  /**
+   * A close-up of Miso wherever he is. On wide screens he sits left of centre
+   * so the chat panel on the right doesn't cover him; on phones he sits above
+   * the chat, which fills the bottom of the screen.
+   */
+  const catView = useCallback((): CameraView => {
+    const cat = brain.position;
+    const toVisitor = new Vector3(STAND[0] - cat.x, 0, STAND[2] - cat.z).normalize();
+    const right = new Vector3(toVisitor.z, 0, -toVisitor.x); // screen-right when facing the cat
+    const wide = window.innerWidth >= 700;
+    const shift = right.multiplyScalar(wide ? 0.38 : 0);
+    const target = cat.clone().add(new Vector3(0, wide ? 0.28 : 0.05, 0)).add(shift);
+    const position = cat.clone().addScaledVector(toVisitor, wide ? 1.35 : 1.7).add(new Vector3(0, wide ? 0.45 : 0.6, 0)).add(shift);
+    return { position: position.toArray() as [number, number, number], target: target.toArray() as [number, number, number] };
+  }, [brain]);
+
+  const openChat = useCallback(() => {
+    if (!live.current.entered) return;
+    setBubble(null);
+    setSection(null);
+    if (live.current.tourIndex === null) {
+      const v = catView();
+      setView(v);
+      brain.faceTowards(v.position);
+      if (!brain.busy && brain.state === "sleep") void brain.play("wake", 1.2, "sit");
+    }
+    setChatOpen(true);
+  }, [brain, catView]);
+
+  const closeChat = useCallback(() => {
+    setChatOpen(false);
+    if (live.current.tourIndex === null) setView(null);
+  }, []);
+
   const sendCat = useCallback(
     async (spot: keyof typeof CAT_SPOTS, faceFrom: CameraView | null, then: "sit" | "talk" = "sit") => {
       const my = ++seq.current;
@@ -227,11 +262,11 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
           text: skipped
             ? `No problem! Drag to look around, click anything, or ask me about ${first}.`
             : `That's the whole tour! Click anything to look closer, or ask me about ${first}. 🐾`,
-          actions: [{ label: `Ask ${catName}`, onClick: () => setChatOpen(true), primary: true }],
+          actions: [{ label: `Ask ${catName}`, onClick: openChat, primary: true }],
         });
       }
     },
-    [catName, first, sendCat],
+    [catName, first, sendCat, openChat],
   );
 
   /** One tour step: camera first, then the cat walks or jumps over and talks. */
@@ -450,7 +485,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
           doorStartsOpen={startedInside}
           onDoor={knock}
         />
-        <Cat brain={brain} onHover={onCatHover} onClick={() => { setBubble(null); setChatOpen(true); }} />
+        <Cat brain={brain} onHover={onCatHover} onClick={openChat} />
         <Behaviors brain={brain} bubbleEl={bubbleEl} canPlay={canPlay} boardEl={boardEl} showBoard={showBoard} tagEls={tagEls} showTags={showTags} />
       </Canvas>
 
@@ -615,7 +650,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
       {/* Dock: every section as a real button (keyboard, screen readers, touch). */}
       {entered && (
         <nav aria-label="Room sections" className="fixed inset-x-0 bottom-0 z-10 p-3 sm:p-4">
-          <ul className="mx-auto flex w-fit max-w-full gap-1.5 overflow-x-auto rounded-full bg-paper/85 p-1.5 shadow-lg backdrop-blur">
+          <ul className="mx-auto flex w-fit max-w-full gap-1.5 overflow-x-auto rounded-full [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-paper/85 p-1.5 shadow-lg backdrop-blur">
             {SECTIONS.map((id) => (
               <li key={id}>
                 <button
@@ -628,7 +663,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
               </li>
             ))}
             <li>
-              <button onClick={() => { setBubble(null); setChatOpen((o) => !o); }} className="whitespace-nowrap rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-ink">
+              <button onClick={() => (chatOpen ? closeChat() : openChat())} className="whitespace-nowrap rounded-full bg-accent px-3 py-1.5 text-sm font-medium text-accent-ink">
                 Ask {catName}
               </button>
             </li>
@@ -644,7 +679,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
       )}
 
       {section && <Overlay section={section} profile={profile} onClose={closeSection} />}
-      {chatOpen && <Chat catName={catName} firstName={first} voice={v} onClose={() => setChatOpen(false)} />}
+      {chatOpen && <Chat catName={catName} firstName={first} voice={v} onClose={closeChat} onReply={() => void brain.play("talk", 1.4, "sit")} />}
     </div>
   );
 }
