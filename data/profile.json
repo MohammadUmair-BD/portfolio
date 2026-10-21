@@ -10,47 +10,179 @@
     "github": "",
     "website": ""
   },
-  "availability": "Yes, Umair is available for new roles. He can start immediately on remote roles; for on-site roles in Karachi or Islamabad he needs about 2–3 weeks.",
+  "availability": {
+    "me": "I am available for new roles. I can start immediately on remote roles; for on-site roles in Karachi or Islamabad I need about 2–3 weeks.",
+    "cat": "Yes, Umair is available for new roles. He can start immediately on remote roles; for on-site roles in Karachi or Islamabad he needs about 2–3 weeks."
+  },
   "workPreferences": {
-    "remote": "He is open to remote, hybrid or on-site roles.",
-    "relocation": "Within Pakistan he can relocate to Karachi or Islamabad (only those two cities), and outside Pakistan he is open to any Gulf country."
+    "remote": {
+      "me": "I am open to remote, hybrid or on-site roles.",
+      "cat": "He is open to remote, hybrid or on-site roles."
+    },
+    "relocation": {
+      "me": "Within Pakistan I can relocate to Karachi or Islamabad (only those two cities), and outside Pakistan I am open to any Gulf country.",
+      "cat": "Within Pakistan he can relocate to Karachi or Islamabad (only those two cities), and outside Pakistan he is open to any Gulf country."
+    }
   },
   "site": {
     "catName": "Miso",
-    "pronouns": { "subject": "he", "object": "him", "possessive": "his" },
+    "pronouns": {
+      "subject": "he",
+      "object": "him",
+      "possessive": "his"
+    },
     "showPhone": true,
     "resumeFile": "/Muhammad_Umair_Resume.pdf"
   },
   "skills": [
-    { "name": "Laravel", "category": "backend", "level": null, "note": "MVC, Action-pattern architecture" },
-    { "name": "PHP", "category": "backend", "level": null },
-    { "name": "RESTful APIs", "category": "backend", "level": null },
-    { "name": "SOLID principles", "category": "backend", "level": null },
-    { "name": "MySQL", "category": "database", "level": "Intermediate" },
-    { "name": "Firebase", "category": "database", "level": "Intermediate" },
-    { "name": "React", "category": "frontend", "level": null },
-    { "name": "Inertia.js", "category": "frontend", "level": null },
-    { "name": "HTML5", "category": "frontend", "level": null },
-    { "name": "CSS3", "category": "frontend", "level": null },
-    { "name": "jQuery", "category": "frontend", "level": null },
-    { "name": "Ajax", "category": "frontend", "level": null },
-    { "name": "DOM manipulation", "category": "frontend", "level": null },
-    { "name": "WordPress/Elementor", "category": "frontend", "level": null },
-    { "name": "Git", "category": "tools", "level": null },
-    { "name": "GitHub", "category": "tools", "level": null },
-    { "name": "GitLab CI", "category": "tools", "level": null },
-    { "name": "Docker", "category": "tools", "level": null },
-    { "name": "Solidity", "category": "other", "level": null, "note": "smart contracts" },
-    { "name": "Filament", "category": "other", "level": null, "note": "admin panels" },
-    { "name": "Vue.js", "category": "familiar", "level": "Familiar" },
-    { "name": "Angular", "category": "familiar", "level": "Familiar" },
-    { "name": "TypeScript", "category": "familiar", "level": "Familiar" },
-    { "name": "Flutter", "category": "familiar", "level": "Familiar" },
-    { "name": "Android Studio", "category": "familiar", "level": "Familiar" },
-    { "name": "Next.js", "category": "familiar", "level": "Familiar" },
-    { "name": "Node.js", "category": "familiar", "level": "Familiar" },
-    { "name": "Redis", "category": "familiar", "level": "Familiar" },
-    { "name": "System Design", "category": "familiar", "level": "Familiar" }
+    {
+      "name": "Laravel",
+      "category": "backend",
+      "level": null,
+      "note": "MVC, Action-pattern architecture"
+    },
+    {
+      "name": "PHP",
+      "category": "backend",
+      "level": null
+    },
+    {
+      "name": "RESTful APIs",
+      "category": "backend",
+      "level": null
+    },
+    {
+      "name": "SOLID principles",
+      "category": "backend",
+      "level": null
+    },
+    {
+      "name": "MySQL",
+      "category": "database",
+      "level": "Intermediate"
+    },
+    {
+      "name": "Firebase",
+      "category": "database",
+      "level": "Intermediate"
+    },
+    {
+      "name": "React",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "Inertia.js",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "HTML5",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "CSS3",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "jQuery",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "Ajax",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "DOM manipulation",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "WordPress/Elementor",
+      "category": "frontend",
+      "level": null
+    },
+    {
+      "name": "Git",
+      "category": "tools",
+      "level": null
+    },
+    {
+      "name": "GitHub",
+      "category": "tools",
+      "level": null
+    },
+    {
+      "name": "GitLab CI",
+      "category": "tools",
+      "level": null
+    },
+    {
+      "name": "Docker",
+      "category": "tools",
+      "level": null
+    },
+    {
+      "name": "Solidity",
+      "category": "other",
+      "level": null,
+      "note": "smart contracts"
+    },
+    {
+      "name": "Filament",
+      "category": "other",
+      "level": null,
+      "note": "admin panels"
+    },
+    {
+      "name": "Vue.js",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "Angular",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "TypeScript",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "Flutter",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "Android Studio",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "Next.js",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "Node.js",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "Redis",
+      "category": "familiar",
+      "level": "Familiar"
+    },
+    {
+      "name": "System Design",
+      "category": "familiar",
+      "level": "Familiar"
+    }
   ],
   "familiarNote": "Applied via AI-assisted development; actively building independent fluency.",
   "experience": [
@@ -65,7 +197,11 @@
         "Strengthened platform security by implementing robust authentication and authorization mechanisms, reducing unauthorized-access risk across all API endpoints.",
         "Cut average API response time by re-architecting slow database queries and adding targeted indexing across core service endpoints."
       ],
-      "tech": ["Laravel", "RESTful APIs", "SOLID principles"]
+      "tech": [
+        "Laravel",
+        "RESTful APIs",
+        "SOLID principles"
+      ]
     },
     {
       "company": "AUN Digital",
@@ -78,7 +214,15 @@
         "Replaced manual, spreadsheet-based operations with custom Filament workflows for the Laravel-based client platforms, cutting routine admin tasks from hours to minutes per day.",
         "Maintained and updated multiple live WordPress/Elementor sites using HTML5 and CSS3, delivering responsive layout changes on tight client turnaround windows while coordinating requirements directly with stakeholders."
       ],
-      "tech": ["Laravel", "Filament", "React", "Inertia.js", "WordPress/Elementor", "HTML5", "CSS3"]
+      "tech": [
+        "Laravel",
+        "Filament",
+        "React",
+        "Inertia.js",
+        "WordPress/Elementor",
+        "HTML5",
+        "CSS3"
+      ]
     },
     {
       "company": "Velosi Asset Integrity Limited",
@@ -92,7 +236,13 @@
         "Achieved a 95% real-time message delivery rate by integrating Firebase Cloud Messaging for push notifications, enabling instant user-facing alerts.",
         "Built a full-cycle matrimonial web platform in Laravel, integrating secure Gmail-based authentication and Ajax for live profile updates, collaborating directly with the product team over a two-year engagement to translate requirements into shipped features."
       ],
-      "tech": ["Laravel", "HTML5", "CSS3", "Ajax", "Firebase"]
+      "tech": [
+        "Laravel",
+        "HTML5",
+        "CSS3",
+        "Ajax",
+        "Firebase"
+      ]
     }
   ],
   "projects": [
@@ -100,78 +250,126 @@
       "title": "Doctors For You",
       "kind": "client",
       "description": "Production platform for a UAE-based client, delivered at AUN Digital: a Laravel + Filament back end with a React/Inertia.js front end, with Filament workflows that replaced spreadsheet-based operations.",
-      "tech": ["Laravel", "Filament", "React", "Inertia.js"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "Laravel",
+        "Filament",
+        "React",
+        "Inertia.js"
+      ],
+      "url": "https://www.doctorsforyou.ae/",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Emkaan",
       "kind": "client",
       "description": "Production platform for a UAE-based client, delivered at AUN Digital: a Laravel + Filament back end with a React/Inertia.js front end, with Filament workflows that replaced spreadsheet-based operations.",
-      "tech": ["Laravel", "Filament", "React", "Inertia.js"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "Laravel",
+        "Filament",
+        "React",
+        "Inertia.js"
+      ],
+      "url": "https://emkaan.com/",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Al-Sadi Group",
       "kind": "client",
       "description": "Production platform for a UAE-based client, delivered at AUN Digital: a Laravel + Filament back end with a React/Inertia.js front end, with Filament workflows that replaced spreadsheet-based operations.",
-      "tech": ["Laravel", "Filament", "React", "Inertia.js"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "Laravel",
+        "Filament",
+        "React",
+        "Inertia.js"
+      ],
+      "url": "https://www.al-sadigroup.com/",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Oilly Hair Care Salon",
       "kind": "client",
       "description": "WordPress/Elementor site for a UAE-based client, delivered at AUN Digital so non-technical staff could manage it independently.",
-      "tech": ["WordPress/Elementor", "HTML5", "CSS3"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "WordPress/Elementor",
+        "HTML5",
+        "CSS3"
+      ],
+      "url": "https://oillyhaircare.com/",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Altura",
       "kind": "client",
       "description": "WordPress/Elementor site for a UAE-based client, delivered at AUN Digital so non-technical staff could manage it independently.",
-      "tech": ["WordPress/Elementor", "HTML5", "CSS3"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "WordPress/Elementor",
+        "HTML5",
+        "CSS3"
+      ],
+      "url": "https://alturadxb.com/",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Banibanna",
       "kind": "client",
-      "description": "Increased application performance by 40%, measured by reduced page load times under production traffic, by optimizing backend logic and database queries (Velosi Asset Integrity).",
-      "tech": [],
-      "url": "", "repo": "", "image": ""
+      "description": "Full-cycle matrimonial web platform built in Laravel at Velosi Asset Integrity, with secure Gmail-based authentication and Ajax live profile updates. Increased application performance by 40%, measured by reduced page load times under production traffic, by optimizing backend logic and database queries. Delivered over a two-year engagement with the product team.",
+      "tech": [
+        "Laravel",
+        "Ajax"
+      ],
+      "url": "https://banibanna.com/",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Ukaam",
       "kind": "client",
       "description": "Redesigned the interface with HTML5, CSS3, and Ajax-driven dynamic profile updates, raising user satisfaction by 25% as measured by client feedback scores (Velosi Asset Integrity).",
-      "tech": ["HTML5", "CSS3", "Ajax"],
-      "url": "", "repo": "", "image": ""
-    },
-    {
-      "title": "Matrimonial Web Platform",
-      "kind": "client",
-      "description": "Full-cycle matrimonial platform built in Laravel with secure Gmail-based authentication and Ajax live profile updates, over a two-year engagement with the product team (Velosi Asset Integrity).",
-      "tech": ["Laravel", "Ajax"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "HTML5",
+        "CSS3",
+        "Ajax"
+      ],
+      "url": "https://ukaam.com/",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Smart Contract Lottery System",
       "kind": "personal",
       "description": "Solidity-based lottery with automated, randomized winner selection and Ethereum payout logic. Started as the capstone of a Coursera Blockchain course (Oct 2021 – Jan 2022).",
-      "tech": ["Solidity", "Ethereum"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "Solidity",
+        "Ethereum"
+      ],
+      "url": "",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Voice Assistant",
       "kind": "personal",
       "description": "Python-based conversational AI supporting voice-activated email composition and command-driven actions (May 2022 – Oct 2022).",
-      "tech": ["Python"],
-      "url": "", "repo": "", "image": ""
+      "tech": [
+        "Python"
+      ],
+      "url": "",
+      "repo": "",
+      "image": ""
     },
     {
       "title": "Animal Encyclopedia",
       "kind": "personal",
       "description": "Web forum for animal-category posts with secure login/signup and comment-based collaboration (Nov 2022 – Apr 2023).",
       "tech": [],
-      "url": "", "repo": "", "image": ""
+      "url": "",
+      "repo": "",
+      "image": ""
     }
   ],
   "education": [
@@ -184,11 +382,27 @@
     }
   ],
   "certifications": [
-    { "name": "Ajax", "issuer": "Coursera", "year": "May 2024", "note": "Applied to live dynamic profile-update features on the Ukaam platform." },
-    { "name": "Blockchain", "issuer": "Coursera", "year": "", "note": "Capstone project became the Smart Contract Lottery System." }
+    {
+      "name": "Ajax",
+      "issuer": "Coursera",
+      "year": "May 2024",
+      "note": "Applied to live dynamic profile-update features on the Ukaam platform."
+    },
+    {
+      "name": "Blockchain",
+      "issuer": "Coursera",
+      "year": "",
+      "note": "Capstone project became the Smart Contract Lottery System."
+    }
   ],
   "languages": [
-    { "name": "Urdu", "level": "Native" },
-    { "name": "English", "level": "C1 Listening/Writing/Spoken Interaction, C2 Reading, B1 Spoken Production" }
+    {
+      "name": "Urdu",
+      "level": "Native"
+    },
+    {
+      "name": "English",
+      "level": "C1 Listening/Writing/Spoken Interaction, C2 Reading, B1 Spoken Production"
+    }
   ]
 }

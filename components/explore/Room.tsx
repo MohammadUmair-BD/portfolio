@@ -64,9 +64,10 @@ export function Room({ profile, onSelect, onHover, penRef, doorRef, doorStartsOp
         <Monitor />
       </Interactive>
       <Interactive id="resume" label="Resume · download it" position={LAYOUT.resume} rotation={[0, 0.2, 0]} {...i}>
-        <Block args={[0.42, 0.012, 0.56]} position={[0, 0.006, 0]} color={C.paper} />
+        {/* Lifted a hair above the desk: sitting exactly on it makes the two surfaces flicker. */}
+        <Block args={[0.42, 0.012, 0.56]} position={[0, 0.009, 0]} color={C.paper} />
         {[0.18, 0.12, 0.06, 0, -0.06, -0.12].map((z, n) => (
-          <Block key={z} args={[n === 0 ? 0.22 : 0.32, 0.002, 0.018]} position={[n === 0 ? -0.05 : 0, 0.013, z]} color={n === 0 ? "#c8643b" : "#c9bfb3"} cast={false} />
+          <Block key={z} args={[n === 0 ? 0.22 : 0.32, 0.002, 0.018]} position={[n === 0 ? -0.05 : 0, 0.0165, z]} color={n === 0 ? "#c8643b" : "#c9bfb3"} cast={false} />
         ))}
       </Interactive>
       <Pen ref={penRef} />
@@ -148,7 +149,7 @@ function Desk() {
       <Block args={[0.85, 0.035, 0.28]} position={[LAYOUT.keyboard[0], DESK_TOP + 0.017, LAYOUT.keyboard[2]]} color="#4a4440" />
       <Block args={[0.8, 0.01, 0.24]} position={[LAYOUT.keyboard[0], DESK_TOP + 0.04, LAYOUT.keyboard[2]]} color="#d8d0c6" cast={false} />
       {/* Chair */}
-      <group position={LAYOUT.chair} rotation={[0, 0.5, 0]}>
+      <group position={LAYOUT.chair} rotation={[0, -0.5, 0]}>
         <Block args={[0.6, 0.08, 0.55]} position={[0, 0.55, 0]} color="#5d6b5f" />
         <Block args={[0.6, 0.6, 0.07]} position={[0, 0.9, 0.27]} color="#5d6b5f" />
         <Block args={[0.06, 0.5, 0.06]} position={[0, 0.28, 0]} color={C.metal} />
@@ -161,7 +162,7 @@ function Desk() {
 function Monitor() {
   return (
     <group>
-      <Block args={[0.32, 0.02, 0.22]} position={[0, 0.01, 0.05]} color={C.metal} />
+      <Block args={[0.32, 0.02, 0.22]} position={[0, 0.012, 0.05]} color={C.metal} />
       <Block args={[0.06, 0.3, 0.05]} position={[0, 0.16, 0]} color={C.metal} />
       <Block args={[1.36, 0.84, 0.06]} position={[0, 0.62, 0.02]} color={C.metal} />
       <mesh position={[0, 0.62, 0.052]}>
@@ -341,7 +342,7 @@ function SideTableWithPhone() {
       <Block args={[0.5, 0.04, 0.5]} position={[0, 0.02, 0]} color={C.wood} />
       {/* Retro phone */}
       <group position={[0.1, top, -0.1]} rotation={[0, -0.5, 0]}>
-        <Block args={[0.34, 0.12, 0.26]} position={[0, 0.06, 0]} color="#c8643b" />
+        <Block args={[0.34, 0.12, 0.26]} position={[0, 0.062, 0]} color="#c8643b" />
         <mesh position={[0, 0.125, 0.04]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.07, 20]} />
           <meshStandardMaterial color="#f3e6d3" />
@@ -362,7 +363,7 @@ function Decor() {
     <group>
       {/* Desk lamp */}
       <group position={LAYOUT.lamp}>
-        <Block args={[0.2, 0.03, 0.2]} position={[0, 0.015, 0]} color={C.metal} />
+        <Block args={[0.2, 0.03, 0.2]} position={[0, 0.017, 0]} color={C.metal} />
         <Block args={[0.03, 0.5, 0.03]} position={[0, 0.27, 0]} color={C.metal} />
         <mesh position={[0.06, 0.52, 0.06]} rotation={[0.6, 0, -0.3]} castShadow>
           <coneGeometry args={[0.12, 0.16, 16, 1, true]} />
@@ -372,7 +373,7 @@ function Decor() {
       </group>
       {/* Mug */}
       <group position={LAYOUT.mug}>
-        <mesh position={[0, 0.07, 0]} castShadow>
+        <mesh position={[0, 0.072, 0]} castShadow>
           <cylinderGeometry args={[0.06, 0.055, 0.14, 16]} />
           <meshStandardMaterial color="#6f8f72" />
         </mesh>

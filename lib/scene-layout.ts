@@ -32,7 +32,7 @@ export const LAYOUT = {
   windowSill: [3.2, 1.36, -4.3] as Vec3,
   sideTable: [4.3, 0, -1.2] as Vec3,
   sideTableTop: 0.76,
-  chair: [-0.55, 0, -2.3] as Vec3, // off to the side so it never blocks the view of the keyboard
+  chair: [1.4, 0, -2.25] as Vec3, // right of the keyboard, so it hides neither Miso nor the resume
   plant: [-4.6, 0, -4.0] as Vec3,
   rug: [0, 0.005, -0.8] as Vec3,
   room: { halfWidth: 5.5, backZ: -4.5, frontZ: 4, height: 4 },
@@ -44,7 +44,7 @@ export const LAYOUT = {
 
 /** Where the visitor stands once inside, and how far they can turn their head. */
 export const STAND: Vec3 = [0, 1.65, 1.9];
-export const LOOK_LIMITS = { yaw: THREE_DEG * 65, pitchUp: THREE_DEG * 14, pitchDown: THREE_DEG * 22 };
+export const LOOK_LIMITS = { yaw: THREE_DEG * 65, pitchUp: THREE_DEG * 30, pitchDown: THREE_DEG * 30 };
 /** Outside the room, facing the door. */
 export const OUTSIDE: CameraView = { position: [0, 1.6, 7.4], target: [0, 1.35, 4] };
 
@@ -89,6 +89,16 @@ export const OBJECT_SECTION: Record<ObjectId, SectionId> = {
 export const SECTION_OBJECT = Object.fromEntries(
   Object.entries(OBJECT_SECTION).map(([o, s]) => [s, o]),
 ) as Record<SectionId, ObjectId>;
+
+/** Where each section heading floats in the room (the bottom-centre of the label). */
+export const TAG_POSITIONS: Record<ObjectId, Vec3> = {
+  certificates: [LAYOUT.certificates[0], LAYOUT.certificates[1] + 0.68, LAYOUT.room.backZ + 0.05],
+  bookshelf: [LAYOUT.bookshelf[0] + 0.2, 2.7, LAYOUT.bookshelf[2]],
+  window: [LAYOUT.window[0], LAYOUT.window[1] + 0.9, LAYOUT.room.backZ + 0.05],
+  monitor: [LAYOUT.monitor[0], LAYOUT.monitor[1] + 0.95, LAYOUT.monitor[2] + 0.06], // across the top of the screen
+  phone: [LAYOUT.sideTable[0], LAYOUT.sideTableTop + 0.55, LAYOUT.sideTable[2]],
+  resume: [LAYOUT.resume[0], DESK_TOP + 0.28, LAYOUT.resume[2]],
+};
 
 export const SECTION_LABELS: Record<SectionId, string> = {
   projects: "Projects",

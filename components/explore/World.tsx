@@ -29,7 +29,7 @@ const IDLE_SLEEP_MS = 60_000;
 const SECTIONS = Object.keys(SECTION_LABELS) as SectionId[];
 const DOOR_OPEN = 1.65; // radians the door swings into the room
 const DRAG_THRESHOLD = 6; // px of movement before a press counts as a drag, not a click
-const STEP = { yaw: 0.35, pitch: 0.14 }; // one press of an arrow
+const STEP = { yaw: 0.35, pitch: 0.17 }; // one press of an arrow (about 20° and 10°)
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Came in through the door earlier in this browser session? Then skip the door. */
@@ -87,16 +87,17 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
 
   const bubbleEl = useRef<HTMLDivElement>(null);
   const boardEl = useRef<HTMLDivElement>(null);
+  const tagEls = useRef<Partial<Record<ObjectId, HTMLButtonElement | null>>>({});
   const penRef = useRef<THREE.Group>(null);
   const doorRef = useRef<THREE.Group>(null);
   const look = useRef<Look>({ yaw: 0, pitch: 0.02 });
   const drag = useRef({ active: false, x: 0, y: 0, moved: 0 });
   const seq = useRef(0); // bumps on every new command so stale async steps bail out
   const introStarted = useRef(false);
-  const live = useRef({ section, tourIndex, chatOpen, bubble, entered, introDone: false, lastActivity: 0, penDown: false });
+  const live = useRef({ section, tourIndex, chatOpen, bubble, entered, zoomed: false, introDone: false, lastActivity: 0, penDown: false });
   useEffect(() => {
-    Object.assign(live.current, { section, tourIndex, chatOpen, bubble, entered });
-  }, [section, tourIndex, chatOpen, bubble, entered]);
+    Object.assign(live.current, { section, tourIndex, chatOpen, bubble, entered, zoomed: view !== null });
+  }, [section, tourIndex, chatOpen, bubble, entered, view]);
 
   useEffect(() => {
     brain.reducedMotion = reducedMotion;
@@ -392,6 +393,8 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
     return s.introDone && s.section === null && s.tourIndex === null && !s.chatOpen && !drag.current.active;
   }, []);
   const showBoard = useCallback(() => live.current.entered && !live.current.section, []);
+  // Section headings only while standing and looking around, not in close-ups.
+  const showTags = useCallback(() => live.current.entered && !live.current.section && !live.current.zoomed, []);
 
   // ESC backs out of a close-up when no dialog is open.
   useEffect(() => {
@@ -448,7 +451,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
           onDoor={knock}
         />
         <Cat brain={brain} onHover={onCatHover} onClick={() => { setBubble(null); setChatOpen(true); }} />
-        <Behaviors brain={brain} bubbleEl={bubbleEl} canPlay={canPlay} boardEl={boardEl} showBoard={showBoard} />
+        <Behaviors brain={brain} bubbleEl={bubbleEl} canPlay={canPlay} boardEl={boardEl} showBoard={showBoard} tagEls={tagEls} showTags={showTags} />
       </Canvas>
 
       {/* Intro board text: real HTML, stretched over the 3D board by <Behaviors>. */}
@@ -467,6 +470,22 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
           More about me →
         </button>
       </div>
+
+      {/* Section headings floating above each object, positioned by <Behaviors>. */}
+      {(Object.keys(OBJECT_SECTION) as ObjectId[]).map((obj) => (
+        <button
+          key={obj}
+          ref={(el) => {
+            tagEls.current[obj] = el;
+          }}
+          onClick={() => openSection(OBJECT_SECTION[obj])}
+          tabIndex={-1}
+          className="fixed left-0 top-0 z-[6] whitespace-nowrap rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#f3ecd9] shadow-md backdrop-blur-sm transition-colors hover:bg-accent hover:text-accent-ink"
+          style={{ visibility: "hidden" }}
+        >
+          {SECTION_LABELS[OBJECT_SECTION[obj]]}
+        </button>
+      ))}
 
       {/* Speech bubble, positioned over the cat by <Behaviors>. */}
       <div ref={bubbleEl} className="group pointer-events-none fixed left-0 top-0 z-10" style={{ visibility: "hidden" }}>
@@ -545,8 +564,8 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
       )}
 
       {/* Look-around pad: a mouse with arrows. Dragging the room does the same thing. */}
-      {looking && (
-        <div className="fixed bottom-20 left-3 z-20 flex items-center gap-3 sm:bottom-6 sm:left-6">
+      {looking && !chatOpen && (
+        <div className="fixed bottom-20 right-3 z-20 flex flex-row-reverse items-center gap-3 sm:bottom-6 sm:right-6">
           <div className="grid grid-cols-3 grid-rows-3 place-items-center rounded-2xl bg-paper/85 p-1 shadow-lg backdrop-blur" role="group" aria-label="Look around">
             <span />
             <PadButton label="Look up" onClick={() => turn(0, STEP.pitch)}>▲</PadButton>

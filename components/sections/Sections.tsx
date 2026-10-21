@@ -27,19 +27,19 @@ export function About({ profile }: P) {
         {profile.availability && (
           <>
             <dt className="text-ink-soft">Availability</dt>
-            <dd>{profile.availability}</dd>
+            <dd>{profile.availability.me}</dd>
           </>
         )}
         {profile.workPreferences?.remote && (
           <>
             <dt className="text-ink-soft">Work style</dt>
-            <dd>{profile.workPreferences.remote}</dd>
+            <dd>{profile.workPreferences.remote.me}</dd>
           </>
         )}
         {profile.workPreferences?.relocation && (
           <>
             <dt className="text-ink-soft">Relocation</dt>
-            <dd>{profile.workPreferences.relocation}</dd>
+            <dd>{profile.workPreferences.relocation.me}</dd>
           </>
         )}
       </dl>
@@ -64,7 +64,16 @@ export function Projects({ profile }: P) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.image} alt="" loading="lazy" className="mb-3 aspect-video w-full rounded-lg object-cover" />
                 )}
-                <h4 className="font-semibold">{p.title}</h4>
+                <h4 className="font-semibold">
+                  {p.url ? (
+                    <a href={p.url} target="_blank" rel="noreferrer" className="underline-offset-4 hover:text-accent hover:underline">
+                      {p.title} <span aria-hidden className="text-ink-soft">↗</span>
+                      <span className="sr-only"> (opens the live site)</span>
+                    </a>
+                  ) : (
+                    p.title
+                  )}
+                </h4>
                 <p className="mt-1 flex-1 text-sm leading-relaxed text-ink-soft">{p.description}</p>
                 {p.tech.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-1.5">{p.tech.map((t) => <Chip key={t}>{t}</Chip>)}</div>

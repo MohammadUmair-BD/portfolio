@@ -24,6 +24,8 @@ export type Project = {
 export type Education = { institution: string; degree: string; start: string; end: string; focus?: string };
 export type Certification = { name: string; issuer: string; year: string; note?: string };
 
+export type Voiced = { me: string; cat: string };
+
 export type Profile = {
   name: string;
   headline: string;
@@ -32,8 +34,9 @@ export type Profile = {
   phone: string | null;
   summary: string;
   links: { linkedin: string; github: string; website: string };
-  availability: string | null;
-  workPreferences: { remote?: string; relocation?: string } | null;
+  /** "me" is shown on the site in first person; "cat" is what Miso says (third person). */
+  availability: Voiced | null;
+  workPreferences: { remote?: Voiced; relocation?: Voiced } | null;
   site: {
     catName: string;
     /** How the cat refers to the person. Leave out to always use the first name. */

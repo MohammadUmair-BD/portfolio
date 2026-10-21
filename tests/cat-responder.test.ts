@@ -118,7 +118,7 @@ describe("answers come from data", () => {
   });
 
   it("falls back on relocation if only remote is known", () => {
-    const c = new RuleBasedResponder({ ...profile, workPreferences: { remote: "Remote is fine." } });
+    const c = new RuleBasedResponder({ ...profile, workPreferences: { remote: { me: "Remote is fine.", cat: "Remote is fine." } } });
     expect(c.respond("would he relocate?").intent).toBe("fallback");
   });
 
@@ -164,6 +164,19 @@ describe("pronouns", () => {
     const c = new RuleBasedResponder({ ...profile, site: { ...profile.site, pronouns: undefined } });
     expect(c.suggestions).toContain("What are Umair's skills?");
     expect(c.respond("salary").text).toContain("reach Umair at");
+  });
+});
+
+describe("project links", () => {
+  it("offers the live site for a client project", () => {
+    const r = ask("tell me about banibanna");
+    expect(r.intent).toBe("project_detail");
+    expect(r.text).toContain("matrimonial");
+    expect(r.links).toContainEqual({ label: "Live site", href: "https://banibanna.com/" });
+  });
+
+  it("has one Banibanna entry (it is the matrimonial platform)", () => {
+    expect(profile.projects.filter((p) => /banibanna|matrimonial/i.test(p.title))).toHaveLength(1);
   });
 });
 

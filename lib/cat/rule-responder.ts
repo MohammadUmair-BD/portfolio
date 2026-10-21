@@ -251,7 +251,7 @@ export class RuleBasedResponder implements CatResponder {
     resume: () => this.reply("resume", `Here's ${this.first}'s resume as a PDF.`, [{ label: "Download resume", href: this.p.site.resumeFile }]),
 
     availability: () =>
-      this.p.availability ? this.reply("availability", this.p.availability, this.contactLinks()) : this.fallback(),
+      this.p.availability ? this.reply("availability", this.p.availability.cat, this.contactLinks()) : this.fallback(),
 
     salary: () =>
       this.reply("salary", `That's best discussed with ${this.first} directly, since it depends on the role. You can reach ${this.v.him} at ${this.p.email}.`, this.contactLinks()),
@@ -272,7 +272,7 @@ export class RuleBasedResponder implements CatResponder {
 
     // Only answer what the profile actually says; otherwise admit it.
     const prefs = this.p.workPreferences;
-    const parts = [asksRemote && prefs?.remote, asksRelocation && prefs?.relocation];
+    const parts = [asksRemote && prefs?.remote?.cat, asksRelocation && prefs?.relocation?.cat];
     if (parts.some((part, i) => [asksRemote, asksRelocation][i] && !part)) return this.fallback();
     return this.reply("location", [based, ...parts.filter(Boolean)].join(" "), this.contactLinks());
   }
