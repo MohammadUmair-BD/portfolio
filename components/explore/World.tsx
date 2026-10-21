@@ -480,7 +480,8 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
           }}
           onClick={() => openSection(OBJECT_SECTION[obj])}
           tabIndex={-1}
-          className="fixed left-0 top-0 z-[6] whitespace-nowrap rounded-full bg-ink/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#f3ecd9] shadow-md backdrop-blur-sm transition-colors hover:bg-accent hover:text-accent-ink"
+          // Fixed colours (not theme tokens): the room looks the same in light and dark mode, so the labels must too.
+          className="fixed left-0 top-0 z-[6] whitespace-nowrap rounded-full bg-[#2a2320]/85 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-[#f3ecd9] shadow-md backdrop-blur-sm transition-colors hover:bg-[#c8643b] hover:text-white"
           style={{ visibility: "hidden" }}
         >
           {SECTION_LABELS[OBJECT_SECTION[obj]]}
