@@ -86,6 +86,8 @@ export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls
       const behind = s.head.z > 1;
       const hx = (s.head.x * 0.5 + 0.5) * size.width;
       const hy = (-s.head.y * 0.5 + 0.5) * size.height;
+      // The bubble belongs to Miso: if he is off screen, it hides rather than sliding along the edge.
+      const catOnScreen = !behind && hx >= 0 && hx <= size.width && hy >= 0 && hy <= size.height;
       if (wide) {
         const side = hx + 380 > size.width ? "left" : "right";
         const x = side === "right" ? hx + 30 : hx - 30;
@@ -98,7 +100,7 @@ export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls
         el.dataset.side = "top";
         el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
       }
-      el.style.visibility = behind ? "hidden" : "visible";
+      el.style.visibility = catOnScreen ? "visible" : "hidden";
     }
 
     // 2. Intro board text: real HTML (readable, selectable, indexable), warped onto

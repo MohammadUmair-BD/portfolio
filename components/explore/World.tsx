@@ -440,6 +440,24 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
     return () => window.removeEventListener("keydown", onKey);
   }, [tour]);
 
+  // When Miso starts talking while the visitor is just standing and looking around,
+  // turn their head towards him so his speech bubble is never shown without him.
+  useEffect(() => {
+    if (!bubble || view || section) return;
+    const cat = brain.position;
+    const dx = cat.x - STAND[0];
+    const dz = cat.z - STAND[2];
+    const wantYaw = Math.atan2(-dx, -dz);
+    // Aim a little above him on narrow screens, where the bubble sits over his head.
+    const wantPitch = Math.atan2(cat.y + (window.innerWidth < 700 ? 0.55 : 0.25) - STAND[1], Math.hypot(dx, dz));
+    const l = look.current;
+    if (Math.abs(l.yaw - wantYaw) > 0.2 || Math.abs(l.pitch - wantPitch) > 0.25) {
+      l.yaw = wantYaw;
+      l.pitch = wantPitch;
+      clampLook(l);
+    }
+  }, [bubble, view, section, brain]);
+
   const touring = tourIndex !== null;
   const zoomed = view !== null || section !== null;
 
