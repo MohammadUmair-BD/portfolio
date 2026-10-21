@@ -44,3 +44,27 @@ export function stopPurr() {
   node?.stop();
   node = null;
 }
+
+/** Three soft knocks on wood. Only played when sound is on. */
+export function playKnock() {
+  try {
+    ctx ??= new AudioContext();
+    const c = ctx;
+    [0, 0.22, 0.44].forEach((at) => {
+      const t = c.currentTime + at;
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(140, t);
+      osc.frequency.exponentialRampToValueAtTime(70, t + 0.12);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.5, t + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+      osc.connect(gain).connect(c.destination);
+      osc.start(t);
+      osc.stop(t + 0.16);
+    });
+  } catch {
+    // No audio available: knocking is silent.
+  }
+}

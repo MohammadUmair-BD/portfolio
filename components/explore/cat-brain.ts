@@ -71,6 +71,7 @@ export class CatBrain {
    */
   moveTo(target: Vec3, then: CatState = "sit", opts: { hop?: boolean } = {}): Promise<boolean> {
     this.stop();
+    this.purring = false; // walking away ends a purr even if the pointer never "left"
     const to = new THREE.Vector3(...target);
     if (this.position.distanceTo(to) < 0.02) {
       this.set(then);

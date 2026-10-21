@@ -61,6 +61,7 @@ export function Interactive({ id, label, onSelect, onHover, children, ...group }
       }}
       onClick={(e) => {
         e.stopPropagation();
+        if (e.delta > 6) return; // the end of a drag-to-look, not a click
         onSelect(id);
       }}
     >

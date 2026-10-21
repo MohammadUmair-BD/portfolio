@@ -3,7 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { DESK_BOUNDS, DESK_TOP } from "@/lib/scene-layout";
+import { DESK_BOUNDS, DESK_TOP, LAYOUT } from "@/lib/scene-layout";
 import type { CatBrain } from "./cat-brain";
 
 type Props = {
@@ -12,11 +12,22 @@ type Props = {
   bubbleEl: React.RefObject<HTMLDivElement | null>;
   /** Whether the cat may play right now (no tour step, no open section, etc.). */
   canPlay: () => boolean;
+  /** DOM element holding the intro board text; stretched over the 3D board every frame. */
+  boardEl: React.RefObject<HTMLDivElement | null>;
+  showBoard: () => boolean;
 };
+
+const { center: BC, width: BW, height: BH } = LAYOUT.board;
+const BOARD_CORNERS = [
+  new THREE.Vector3(BC[0] - BW / 2, BC[1] + BH / 2, BC[2] + 0.04),
+  new THREE.Vector3(BC[0] + BW / 2, BC[1] + BH / 2, BC[2] + 0.04),
+  new THREE.Vector3(BC[0] - BW / 2, BC[1] - BH / 2, BC[2] + 0.04),
+  new THREE.Vector3(BC[0] + BW / 2, BC[1] - BH / 2, BC[2] + 0.04),
+];
 
 const deskPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -DESK_TOP);
 
-export function Behaviors({ brain, bubbleEl, canPlay }: Props) {
+export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard }: Props) {
   const { camera, size, raycaster } = useThree();
   const dot = useRef<THREE.Mesh>(null!);
   const s = useMemo(
@@ -28,15 +39,47 @@ export function Behaviors({ brain, bubbleEl, canPlay }: Props) {
     // 1. Speech bubble follows the cat's head on screen (works after resizes too).
     const el = bubbleEl.current;
     if (el) {
-      s.head.copy(brain.position).add(new THREE.Vector3(0, 0.7, 0)).project(camera);
+      // Wide screens: beside the cat, so the intro board above stays readable.
+      // Narrow screens: above the cat, where there is room.
+      const wide = size.width >= 700;
+      s.head.copy(brain.position).add(new THREE.Vector3(0, wide ? 0.42 : 0.7, 0)).project(camera);
       const behind = s.head.z > 1;
-      const x = THREE.MathUtils.clamp((s.head.x * 0.5 + 0.5) * size.width, 150, size.width - 150);
-      const y = THREE.MathUtils.clamp((-s.head.y * 0.5 + 0.5) * size.height, 110, size.height - 40);
-      el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
+      const hx = (s.head.x * 0.5 + 0.5) * size.width;
+      const hy = (-s.head.y * 0.5 + 0.5) * size.height;
+      if (wide) {
+        const side = hx + 380 > size.width ? "left" : "right";
+        const x = side === "right" ? hx + 30 : hx - 30;
+        const y = THREE.MathUtils.clamp(hy, 110, size.height - 130);
+        el.dataset.side = side;
+        el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(${side === "right" ? "0" : "-100%"}, -50%)`;
+      } else {
+        const x = THREE.MathUtils.clamp(hx, 150, size.width - 150);
+        const y = THREE.MathUtils.clamp(hy, 110, size.height - 40);
+        el.dataset.side = "top";
+        el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`;
+      }
       el.style.visibility = behind ? "hidden" : "visible";
     }
 
-    // 2. Laser-dot chase: a fast pointer near the cat on the desk.
+    // 2. Intro board text: real HTML laid over the 3D board (readable, selectable, indexable).
+    const board = boardEl.current;
+    if (board) {
+      const pts = BOARD_CORNERS.map((c) => s.head.copy(c).project(camera).clone());
+      const visible = showBoard() && pts.every((p) => p.z < 1);
+      board.style.visibility = visible ? "visible" : "hidden";
+      if (visible) {
+        const xs = pts.map((p) => (p.x * 0.5 + 0.5) * size.width);
+        const ys = pts.map((p) => (-p.y * 0.5 + 0.5) * size.height);
+        const left = Math.min(...xs), top = Math.min(...ys);
+        const w = Math.max(...xs) - left, h = Math.max(...ys) - top;
+        board.style.transform = `translate3d(${left}px, ${top}px, 0)`;
+        board.style.width = `${w}px`;
+        board.style.height = `${h}px`;
+        board.style.fontSize = `${Math.max(6, h / 11)}px`;
+      }
+    }
+
+    // 3. Laser-dot chase: a fast pointer near the cat on the desk.
     const t = state.clock.elapsedTime;
     const moved = s.lastPointer.distanceTo(state.pointer);
     s.lastPointer.copy(state.pointer);

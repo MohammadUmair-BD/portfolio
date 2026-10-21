@@ -74,6 +74,12 @@ The matcher sits behind the `CatResponder` interface (`lib/cat/types.ts`). To ad
 
 The endpoint is rate limited to 30 questions per minute per IP. The limit is held in memory, so it's best effort on serverless, and questions are capped at 300 characters.
 
+## How the room works
+
+- **The door:** every new visit starts outside a door with a "Welcome" plaque. The visitor knocks (with a sound, if sound is on), the door swings open, and the camera walks in. If they leave for Quick view and come back in the same browser tab, they skip the door and start inside. This uses `sessionStorage`.
+- **Looking around:** the visitor stands in one spot and turns their head by dragging (mouse or finger), with the on-screen mouse-and-arrows pad, or with the keyboard arrow keys. Plain mouse movement never turns the view, so clicking objects is always safe. A press that moves more than 6 px counts as a drag, not a click. Turning is limited to 65° left and right, 14° up and 22° down. Change `STAND` and `LOOK_LIMITS` in `lib/scene-layout.ts`.
+- **The intro board:** the board on the back wall shows your name, headline and location. Its text is real HTML laid over the 3D board, so people can select it, screen readers can read it and search engines can index it.
+
 ## Editing the tour dialogue
 
 The tour is defined as data in **`lib/tour.ts`**. Each step has a `target` object, a `line`, and a `camera` view. Keep the lines built from `p` (the profile) so they stay true when your data changes. Object positions, the cat's standing spots, and camera close-ups live in `lib/scene-layout.ts`. Move an object there and everything that depends on it follows. Jump arcs are computed at runtime.

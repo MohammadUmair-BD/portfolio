@@ -6,6 +6,8 @@
  */
 export type Vec3 = [number, number, number];
 export type SectionId = "projects" | "skills" | "experience" | "about" | "contact" | "resume";
+const THREE_DEG = Math.PI / 180;
+
 export type ObjectId = "monitor" | "bookshelf" | "certificates" | "window" | "phone" | "resume";
 
 export const DESK = { center: [0.3, 0, -3.4] as Vec3, width: 3.2, depth: 1.3, height: 1.0 };
@@ -30,11 +32,21 @@ export const LAYOUT = {
   windowSill: [3.2, 1.36, -4.3] as Vec3,
   sideTable: [4.3, 0, -1.2] as Vec3,
   sideTableTop: 0.76,
-  chair: [0.4, 0, -2.0] as Vec3,
+  chair: [-0.55, 0, -2.3] as Vec3, // off to the side so it never blocks the view of the keyboard
   plant: [-4.6, 0, -4.0] as Vec3,
   rug: [0, 0.005, -0.8] as Vec3,
   room: { halfWidth: 5.5, backZ: -4.5, frontZ: 4, height: 4 },
+  /** The intro board on the back wall, above the desk: centre and size. */
+  board: { center: [0.3, 2.85, -4.43] as Vec3, width: 2.5, height: 1.15 },
+  /** The front door the visitor knocks on; it swings on a hinge at its left edge. */
+  door: { x: 0, width: 1.1, height: 2.25 },
 };
+
+/** Where the visitor stands once inside, and how far they can turn their head. */
+export const STAND: Vec3 = [0, 1.65, 1.9];
+export const LOOK_LIMITS = { yaw: THREE_DEG * 65, pitchUp: THREE_DEG * 14, pitchDown: THREE_DEG * 22 };
+/** Outside the room, facing the door. */
+export const OUTSIDE: CameraView = { position: [0, 1.6, 7.4], target: [0, 1.35, 4] };
 
 const add = (a: Vec3, b: Vec3): Vec3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 
@@ -52,7 +64,8 @@ export const CAT_SPOTS: Record<ObjectId | "home" | "pen", Vec3> = {
 
 export type CameraView = { position: Vec3; target: Vec3 };
 
-export const OVERVIEW: CameraView = { position: [5.6, 4.3, 6.6], target: [-0.4, 1.2, -2] };
+/** Looking straight ahead from the door: the intro board and desk. */
+export const OVERVIEW: CameraView = { position: STAND, target: [0.2, 1.75, -4.5] };
 
 /** Close-up views used when a section opens and by the tour. */
 export const FOCUS: Record<ObjectId, CameraView> = {

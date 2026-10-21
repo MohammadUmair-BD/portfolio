@@ -83,8 +83,7 @@ export function Cat({ brain, onClick, onHover }: Props) {
 
     // Breathing and purring.
     const breathe = Math.sin(t * (brain.state === "sleep" ? 1.6 : 2.6)) * (brain.state === "sleep" ? 0.012 : 0.006);
-    const purr = brain.purring ? Math.sin(t * 90) * 0.004 : 0;
-    body.current.position.y = p.bodyY + breathe + purr;
+    body.current.position.y = p.bodyY + breathe;
     body.current.rotation.x = p.bodyPitch;
     body.current.scale.set(1 + breathe * 2, 1 + breathe * 2, 1);
 
@@ -129,7 +128,8 @@ export function Cat({ brain, onClick, onHover }: Props) {
       b.next = t + 2.5 + Math.random() * 4;
     }
     b.closing = Math.max(0, b.closing - dt);
-    const open = b.closing > 0 && brain.state !== "sleep" ? 0.1 : p.eyeOpen;
+    // Purring: happy, half-closed eyes instead of any shaking.
+    const open = b.closing > 0 && brain.state !== "sleep" ? 0.1 : brain.purring ? Math.min(p.eyeOpen, 0.35) : p.eyeOpen;
     for (const e of eyes.current) e.scale.y = damp(e.scale.y, open, 25, dt);
 
     // Little extras.
@@ -143,7 +143,11 @@ export function Cat({ brain, onClick, onHover }: Props) {
       });
     }
     hearts.current.visible = brain.purring;
-    if (brain.purring) hearts.current.position.y = 0.62 + Math.sin(t * 3) * 0.03;
+    if (brain.purring) {
+      const k = (t * 0.6) % 1; // hearts drift up and fade, then start again
+      hearts.current.position.y = 0.55 + k * 0.25;
+      hearts.current.children.forEach((h) => (((h as THREE.Mesh).material as THREE.MeshBasicMaterial).opacity = (1 - k) * brain.opacity));
+    }
 
     for (const m of materials.current) m.opacity = brain.opacity;
     root.current.visible = brain.opacity > 0.01;
@@ -161,6 +165,7 @@ export function Cat({ brain, onClick, onHover }: Props) {
       onPointerOut={() => onHover(false)}
       onClick={(e) => {
         e.stopPropagation();
+        if (e.delta > 6) return; // the end of a drag, not a click
         onClick();
       }}
     >
