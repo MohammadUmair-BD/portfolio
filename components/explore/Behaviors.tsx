@@ -30,7 +30,42 @@ const BOARD_CORNERS = [
   new THREE.Vector3(BC[0] + BW / 2, BC[1] - BH / 2, BC[2] + 0.04),
 ];
 
-const deskPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -DESK_TOP);
+/** The board text is laid out at this fixed size, then warped onto the board. */
+const BOARD_PX = { w: 500, h: Math.round((500 * BH) / BW) };
+
+/**
+ * CSS matrix3d that maps a w×h box onto a screen quad (top-left, top-right,
+ * bottom-left, bottom-right), i.e. the perspective homography between them.
+ */
+function rectToQuad(w: number, h: number, quad: readonly (readonly [number, number])[]): string {
+  const src = [[0, 0], [w, 0], [0, h], [w, h]];
+  const A: number[][] = [];
+  const b: number[] = [];
+  src.forEach(([x, y], i) => {
+    const [X, Y] = quad[i];
+    A.push([x, y, 1, 0, 0, 0, -x * X, -y * X]);
+    b.push(X);
+    A.push([0, 0, 0, x, y, 1, -x * Y, -y * Y]);
+    b.push(Y);
+  });
+  // Solve the 8×8 system with Gaussian elimination (partial pivoting).
+  for (let c = 0; c < 8; c++) {
+    let p = c;
+    for (let r = c + 1; r < 8; r++) if (Math.abs(A[r][c]) > Math.abs(A[p][c])) p = r;
+    [A[c], A[p]] = [A[p], A[c]];
+    [b[c], b[p]] = [b[p], b[c]];
+    for (let r = 0; r < 8; r++) {
+      if (r === c) continue;
+      const f = A[r][c] / A[c][c];
+      for (let k = c; k < 8; k++) A[r][k] -= f * A[c][k];
+      b[r] -= f * b[c];
+    }
+  }
+  const [a, bb, c, d, e, f, g, hh] = b.map((v, i) => v / A[i][i]);
+  return `matrix3d(${a},${d},0,${g},${bb},${e},0,${hh},0,0,1,0,${c},${f},0,1)`;
+}
+
+const deskPlane =new THREE.Plane(new THREE.Vector3(0, 1, 0), -DESK_TOP);
 
 export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls, showTags }: Props) {
   const { camera, size, raycaster } = useThree();
@@ -66,21 +101,20 @@ export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls
       el.style.visibility = behind ? "hidden" : "visible";
     }
 
-    // 2. Intro board text: real HTML laid over the 3D board (readable, selectable, indexable).
+    // 2. Intro board text: real HTML (readable, selectable, indexable), warped onto
+    //    the board's four projected corners so it stays glued to it from any angle.
     const board = boardEl.current;
     if (board) {
       const pts = BOARD_CORNERS.map((c) => s.head.copy(c).project(camera).clone());
       const visible = showBoard() && pts.every((p) => p.z < 1);
       board.style.visibility = visible ? "visible" : "hidden";
       if (visible) {
-        const xs = pts.map((p) => (p.x * 0.5 + 0.5) * size.width);
-        const ys = pts.map((p) => (-p.y * 0.5 + 0.5) * size.height);
-        const left = Math.min(...xs), top = Math.min(...ys);
-        const w = Math.max(...xs) - left, h = Math.max(...ys) - top;
-        board.style.transform = `translate3d(${left}px, ${top}px, 0)`;
-        board.style.width = `${w}px`;
-        board.style.height = `${h}px`;
-        board.style.fontSize = `${Math.max(6, h / 11)}px`;
+        const screen = pts.map((p) => [(p.x * 0.5 + 0.5) * size.width, (-p.y * 0.5 + 0.5) * size.height] as const);
+        board.style.width = `${BOARD_PX.w}px`;
+        board.style.height = `${BOARD_PX.h}px`;
+        board.style.fontSize = `${BOARD_PX.h / 11}px`;
+        board.style.transformOrigin = "0 0";
+        board.style.transform = rectToQuad(BOARD_PX.w, BOARD_PX.h, screen);
       }
     }
 
