@@ -1,10 +1,12 @@
 "use client";
 
 import { Analytics, type BeforeSendEvent } from "@vercel/analytics/next";
+import { useSyncExternalStore } from "react";
 
 /**
  * Visit counts via Vercel Web Analytics: no cookies, no personal data, nothing
- * about individual visitors. Only active once the site is deployed on Vercel.
+ * about individual visitors. Skipped on localhost, where there is no Vercel
+ * endpoint to send to.
  */
 function beforeSend(event: BeforeSendEvent): BeforeSendEvent | null {
   const url = new URL(event.url);
@@ -13,6 +15,10 @@ function beforeSend(event: BeforeSendEvent): BeforeSendEvent | null {
   return { ...event, url: url.toString() };
 }
 
+const subscribe = () => () => {};
+const isDeployed = () => !["localhost", "127.0.0.1", "[::1]"].includes(window.location.hostname);
+
 export function SiteAnalytics() {
-  return <Analytics beforeSend={beforeSend} />;
+  const deployed = useSyncExternalStore(subscribe, isDeployed, () => false);
+  return deployed ? <Analytics beforeSend={beforeSend} /> : null;
 }

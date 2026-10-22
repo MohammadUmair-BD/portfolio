@@ -34,8 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${body.variable} ${display.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
         {children}
-        {/* Vercel sets VERCEL=1 at build time; elsewhere (localhost) there is no analytics endpoint to send to. */}
-        {process.env.VERCEL === "1" && <SiteAnalytics />}
+        <SiteAnalytics />
       </body>
     </html>
   );
