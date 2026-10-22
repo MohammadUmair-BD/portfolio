@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist } from "next/font/google";
+import { SiteAnalytics } from "@/components/SiteAnalytics";
 import { profile } from "@/lib/profile";
 import "./globals.css";
 
@@ -31,7 +32,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${body.variable} ${display.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        {/* Vercel sets VERCEL=1 at build time; elsewhere (localhost) there is no analytics endpoint to send to. */}
+        {process.env.VERCEL === "1" && <SiteAnalytics />}
+      </body>
     </html>
   );
 }
