@@ -204,15 +204,18 @@ export function RatingStars({ variant = "strip", messages, onContact }: Props) {
 
   let message: React.ReactNode = null;
   if (pending) {
+    // The message changes as soon as a star is picked; nothing is saved until Confirm.
     message = (
-      <span className="flex flex-wrap items-center gap-2">
-        <span>Rate {pending}★?</span>
-        <button type="button" onClick={confirm} disabled={busy} className={`${linkClass} font-semibold`}>
-          {busy ? "Saving…" : "Confirm"}
-        </button>
-        <button type="button" onClick={() => setPending(0)} disabled={busy} className="underline-offset-2 hover:underline">
-          Cancel
-        </button>
+      <span className="flex flex-col gap-1.5">
+        <span aria-live="polite">{messages[String(pending) as keyof Messages]}</span>
+        <span className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={confirm} disabled={busy} className={`${linkClass} font-semibold`}>
+            {busy ? "Saving…" : `Confirm ${pending}★`}
+          </button>
+          <button type="button" onClick={() => setPending(0)} disabled={busy} className="underline-offset-2 hover:underline">
+            Cancel
+          </button>
+        </span>
       </span>
     );
   } else if (status.kind === "error") {

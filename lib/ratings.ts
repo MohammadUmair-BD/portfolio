@@ -78,6 +78,9 @@ function store(): Store | null {
   return process.env.VERCEL ? null : memoryStore;
 }
 
+/** Requests from this computer (local testing): many browsers share one address, so the per-network cap is skipped. */
+const isLocalAddress = (ip: string) => ["local", "127.0.0.1", "::1", "::ffff:127.0.0.1"].includes(ip);
+
 const activeLock = (r: StoredRating | null) => (r?.lockedUntil && r.lockedUntil > Date.now() ? r.lockedUntil : null);
 
 export async function getSummary(voter?: string): Promise<RatingSummary> {
@@ -120,7 +123,7 @@ export async function rate(voter: string, stars: number, ip: string): Promise<Ra
   if (existing?.stars === stars) return { status: "ok" };
 
   const ipHash = hashNetwork(ip);
-  if (!existing && (await s.newVotersFrom(ipHash, new Date(Date.now() - DAY_MS))) >= NEW_VOTERS_PER_NETWORK_PER_DAY) {
+  if (!existing && !isLocalAddress(ip) && (await s.newVotersFrom(ipHash, new Date(Date.now() - DAY_MS))) >= NEW_VOTERS_PER_NETWORK_PER_DAY) {
     return { status: "limited" };
   }
   const changes = (existing?.changes ?? 0) + 1;
