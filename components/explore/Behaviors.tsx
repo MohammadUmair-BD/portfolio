@@ -3,7 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { DESK_BOUNDS, DESK_TOP, LAYOUT, RATING_POSITION, TAG_POSITIONS, type ObjectId } from "@/lib/scene-layout";
+import { DESK_BOUNDS, DESK_TOP, LAYOUT, RATING_STRIP, TAG_POSITIONS, type ObjectId } from "@/lib/scene-layout";
 import type { CatBrain } from "./cat-brain";
 
 type Props = {
@@ -22,7 +22,14 @@ type Props = {
   ratingEl: React.RefObject<HTMLDivElement | null>;
 };
 
-const RATING_ANCHOR = new THREE.Vector3(...RATING_POSITION);
+const RATING_CORNERS = (() => {
+  const [x, y, z] = RATING_STRIP.center;
+  const w = RATING_STRIP.width / 2, h = RATING_STRIP.height / 2;
+  return [new THREE.Vector3(x - w, y + h, z), new THREE.Vector3(x + w, y + h, z), new THREE.Vector3(x - w, y - h, z), new THREE.Vector3(x + w, y - h, z)];
+})();
+/** The rating is laid out in a box this size, then warped onto the wall strip above the board. */
+// A smaller layout box means everything is drawn larger on the wall (about 30% bigger than at 360).
+export const RATING_PX = { w: 280, h: Math.round((280 * RATING_STRIP.height) / RATING_STRIP.width) };
 
 const TAGS = (Object.entries(TAG_POSITIONS) as [ObjectId, [number, number, number]][]).map(([id, p]) => [id, new THREE.Vector3(...p)] as const);
 
@@ -137,14 +144,19 @@ export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls
       }
     }
 
-    // 4. Star rating above the board (shown with the headings, i.e. while looking around).
+    // 4. Star rating on the wall above the board, warped into the wall's perspective like the board text
+    //    (shown with the headings, i.e. while looking around).
     const rating = ratingEl.current;
     if (rating) {
-      s.hit.copy(RATING_ANCHOR).project(camera);
-      const onScreen = tagsOn && s.hit.z < 1 && Math.abs(s.hit.x) < 1.05 && s.hit.y < 1.05 && s.hit.y > -1;
-      rating.style.visibility = onScreen ? "visible" : "hidden";
-      if (onScreen) {
-        rating.style.transform = `translate3d(${(s.hit.x * 0.5 + 0.5) * size.width}px, ${(-s.hit.y * 0.5 + 0.5) * size.height}px, 0) translate(-50%, -100%)`;
+      const pts = RATING_CORNERS.map((c) => s.hit.copy(c).project(camera).clone());
+      const visible = tagsOn && pts.every((p) => p.z < 1);
+      rating.style.visibility = visible ? "visible" : "hidden";
+      if (visible) {
+        const screen = pts.map((p) => [(p.x * 0.5 + 0.5) * size.width, (-p.y * 0.5 + 0.5) * size.height] as const);
+        rating.style.width = `${RATING_PX.w}px`;
+        rating.style.height = `${RATING_PX.h}px`;
+        rating.style.transformOrigin = "0 0";
+        rating.style.transform = rectToQuad(RATING_PX.w, RATING_PX.h, screen);
       }
     }
 

@@ -122,7 +122,8 @@ export function RatingStars({ variant = "strip", messages, onContact }: Props) {
 
   const mine = summary.mine ?? 0;
   const locked = Boolean(lockedUntil && lockedUntil > now);
-  const shown = pending || hover || mine;
+  // What the stars show: the star being hovered, else the picked-but-unconfirmed one, else the saved rating.
+  const shown = hover || pending || mine;
   const busy = status.kind === "saving";
 
   const choose = (n: number) => {
@@ -157,7 +158,7 @@ export function RatingStars({ variant = "strip", messages, onContact }: Props) {
       aria-label="Rate this portfolio from 1 to 5 stars"
       aria-disabled={locked || undefined}
       className="flex items-center"
-      onMouseLeave={() => setHover(0)}
+      onPointerLeave={() => setHover(0)}
     >
       {STARS.map((n) => (
         <button
@@ -172,13 +173,15 @@ export function RatingStars({ variant = "strip", messages, onContact }: Props) {
           tabIndex={n === focusable ? 0 : -1}
           disabled={locked || busy}
           onClick={() => choose(n)}
-          onMouseEnter={() => !locked && setHover(n)}
-          onFocus={() => !locked && setHover(n)}
+          // Preview on a real mouse hover, or keyboard focus. Touch has no hover: a tap selects,
+          // which shows the same message with Confirm, so phones get the preview that way.
+          onPointerEnter={(e) => e.pointerType === "mouse" && !locked && setHover(n)}
+          onFocus={(e) => e.currentTarget.matches(":focus-visible") && !locked && setHover(n)}
           onBlur={() => setHover(0)}
           onKeyDown={(e) => onKeyDown(e, n)}
           className={`rounded-md transition-transform enabled:hover:scale-110 disabled:cursor-not-allowed ${board ? "p-0.5" : "p-1"}`}
         >
-          <Star filled={n <= shown} size={board ? 18 : 28} />
+          <Star filled={n <= shown} size={board ? 16 : 28} />
         </button>
       ))}
     </div>
@@ -203,7 +206,15 @@ export function RatingStars({ variant = "strip", messages, onContact }: Props) {
     ) : null;
 
   let message: React.ReactNode = null;
-  if (pending) {
+  if (hover && hover !== pending) {
+    // Hovering previews that rating's message; clicking chooses it.
+    message = (
+      <span className="flex flex-col gap-1">
+        <span>{messages[String(hover) as keyof Messages]}</span>
+        <span className="opacity-60">Click to choose {hover}★</span>
+      </span>
+    );
+  } else if (pending) {
     // The message changes as soon as a star is picked; nothing is saved until Confirm.
     message = (
       <span className="flex flex-col gap-1.5">
@@ -233,14 +244,45 @@ export function RatingStars({ variant = "strip", messages, onContact }: Props) {
   ) : null;
 
   if (board) {
+    // Fixed-size sign on the wall above the board: it never grows, whatever the message.
+    // Line 1: stars + score (or Confirm/Cancel while choosing, or a short countdown).
+    // Line 2: the message, at most two lines.
+    const boardText =
+      hover ? messages[String(hover) as keyof Messages]
+      : pending ? messages[String(pending) as keyof Messages]
+      : status.kind === "error" ? status.message
+      : status.kind === "thanks" && mine ? messages[String(mine) as keyof Messages]
+      : null;
+    const smallButton = "rounded-full border border-[#f3ecd9]/40 px-1.5 leading-4 hover:bg-[#f3ecd9]/10";
+    const right = pending ? (
+      <span className="flex items-center gap-1.5">
+        <button type="button" onClick={confirm} disabled={busy} className={`${smallButton} font-semibold`}>
+          {busy ? "Saving…" : `Confirm ${pending}★`}
+        </button>
+        <button type="button" onClick={() => setPending(0)} disabled={busy} className="hover:underline">Cancel</button>
+      </span>
+    ) : (
+      <span className="flex items-center gap-1.5">
+        {locked && lockedUntil ? <span className="opacity-75" title="You can change your rating after this">🔒 {formatWait(lockedUntil - now)}</span> : score}
+        {status.kind === "thanks" && (mine === 5 || (mine && mine <= 2)) && onContact && (
+          <button type="button" onClick={onContact} className={smallButton}>Contact</button>
+        )}
+      </span>
+    );
     return (
-      <div className="flex max-w-[300px] flex-col items-center gap-1 rounded-2xl bg-[#2a2320]/85 px-3 py-1.5 text-center text-xs text-[#f3ecd9] shadow-md backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          {stars}
-          {score}
+      <div className="flex h-full w-full flex-col items-center justify-end">
+        <div className="flex w-full flex-col items-center gap-0.5 rounded-2xl bg-[#2a2320]/85 px-3 py-1 text-center text-[11px] text-[#f3ecd9] shadow-md backdrop-blur-sm">
+          <div className="flex items-center gap-2 whitespace-nowrap">
+            {stars}
+            {right}
+          </div>
+          <p
+            className={`line-clamp-2 min-h-[2.5em] text-[10px] leading-[1.25em] ${status.kind === "error" && !hover && !pending ? "text-[#e88a7c]" : "opacity-90"}`}
+            aria-live="polite"
+          >
+            {boardText ?? (mine ? `You rated ${mine}★` : "Hover or tap a star to rate")}
+          </p>
         </div>
-        {message && <div className="text-[11px] leading-snug">{message}</div>}
-        {countdown && <div className="text-[10px]">{countdown}</div>}
       </div>
     );
   }

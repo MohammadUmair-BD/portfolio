@@ -1,13 +1,14 @@
 /**
  * The site's public address, used for canonical links, the sitemap and share
- * previews. SITE_URL wins if set (e.g. a custom domain); otherwise Vercel's
- * own production address is used automatically.
+ * previews. On Vercel this is the project's production address, which already
+ * follows any custom domain you add there. SITE_URL is only for running
+ * elsewhere (e.g. locally).
  */
 export function siteUrl(): string {
-  const explicit = process.env.SITE_URL?.trim();
-  if (explicit) return explicit.replace(/\/+$/, "");
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
   if (vercel) return `https://${vercel}`;
+  const explicit = process.env.SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/+$/, "");
   return "http://localhost:3000";
 }
 

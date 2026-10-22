@@ -527,7 +527,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
       </div>
 
       {/* Star rating floating above the intro board, positioned by <Behaviors>. */}
-      <div ref={ratingEl} className="fixed left-0 top-0 z-[7]" style={{ visibility: "hidden" }}>
+      <div ref={ratingEl} className="fixed left-0 top-0 z-[7] flex flex-col items-center justify-end" style={{ visibility: "hidden" }}>
         <RatingStars variant="board" messages={profile.ratingMessages} onContact={() => openSection("contact")} />
       </div>
 

@@ -100,8 +100,16 @@ export const TAG_POSITIONS: Record<ObjectId, Vec3> = {
   resume: [LAYOUT.resume[0], DESK_TOP + 0.28, LAYOUT.resume[2]],
 };
 
-/** The star rating floats just above the intro board (bottom-centre of the widget). */
-export const RATING_POSITION: Vec3 = [LAYOUT.board.center[0], LAYOUT.board.center[1] + LAYOUT.board.height / 2 + 0.18, LAYOUT.board.center[2] + 0.05];
+/**
+ * The star rating sits on the wall just above the intro board, in the same plane,
+ * so it tilts with the board when seen at an angle. Its stars line up with the
+ * bottom of this strip; longer messages grow upward from there.
+ */
+export const RATING_STRIP = {
+  center: [LAYOUT.board.center[0], LAYOUT.board.center[1] + LAYOUT.board.height / 2 + 0.33, LAYOUT.board.center[2] + 0.04] as Vec3,
+  width: 2.4,
+  height: 0.46,
+};
 
 export const SECTION_LABELS: Record<SectionId, string> = {
   projects: "Projects",
