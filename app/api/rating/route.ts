@@ -36,9 +36,16 @@ export async function POST(request: Request) {
     }
 
     const result = await rate(voter, stars, ip);
-    if (result === "unavailable") return Response.json({ error: "Ratings aren't switched on yet." }, { status: 503 });
-    if (result === "limited") {
+    if (result.status === "unavailable") return Response.json({ error: "Ratings aren't switched on yet." }, { status: 503 });
+    if (result.status === "limited") {
       return Response.json({ error: "Thanks! Several people on your network have already rated today." }, { status: 429 });
+    }
+    if (result.status === "cooldown") {
+      const retryAfter = Math.ceil((result.lockedUntil - Date.now()) / 1000);
+      return Response.json(
+        { error: "You changed your rating recently. Please wait before changing it again.", lockedUntil: result.lockedUntil, retryAfter },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } },
+      );
     }
     return Response.json(await getSummary(voter));
   });

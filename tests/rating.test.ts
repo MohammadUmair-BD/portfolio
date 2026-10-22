@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/rating/route";
-import { hashNetwork, resetMemoryRatings } from "@/lib/ratings";
+import { cooldownSeconds, hashNetwork, resetMemoryRatings } from "@/lib/ratings";
 
 // No DATABASE_URL and not on Vercel in tests, so ratings use the in-memory store.
 let n = 0;
@@ -14,7 +14,13 @@ const vote = (v: string, stars: unknown, ip = "10.3.0.1", headers: Record<string
 const summary = async (v?: string) => (await GET(new Request(`http://localhost/api/rating${v ? `?voter=${v}` : ""}`))).json();
 
 describe("ratings", () => {
-  beforeEach(() => resetMemoryRatings());
+  beforeEach(() => {
+    resetMemoryRatings();
+    vi.useFakeTimers({ toFake: ["Date"] }); // control the clock for cooldowns
+    vi.setSystemTime(new Date("2026-10-22T12:00:00Z"));
+  });
+  afterEach(() => vi.useRealTimers());
+  const wait = (seconds: number) => vi.setSystemTime(Date.now() + seconds * 1000);
 
   it("hides the average until 3 people have rated, then shows it with the count", async () => {
     expect(await summary()).toMatchObject({ available: true, average: null, count: 0 });
@@ -25,11 +31,47 @@ describe("ratings", () => {
     expect(await summary()).toMatchObject({ average: 4, count: 3 });
   });
 
-  it("lets a visitor change their rating without counting twice", async () => {
+  it("lets a visitor change their rating after the cooldown, without counting twice", async () => {
     const me = voter();
     await vote(me, 2, "10.3.2.1");
+    wait(61);
     const res = await vote(me, 5, "10.3.2.1");
     expect(await res.json()).toMatchObject({ count: 1, mine: 5 });
+  });
+
+  it("refuses a change during the cooldown and says when it ends", async () => {
+    const me = voter();
+    const first = await (await vote(me, 4, "10.3.7.1")).json();
+    expect(first.lockedUntil).toBe(Date.now() + 60_000);
+    const res = await vote(me, 2, "10.3.7.1");
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("60");
+    expect((await summary(me)).mine).toBe(4); // unchanged
+  });
+
+  it("makes each later change wait longer: 60 s, 5 min, 30 min, 60 min, 6 h, 2.5 days, then 5x up to a year", async () => {
+    expect([1, 2, 3, 4, 5, 6].map(cooldownSeconds)).toEqual([60, 300, 1800, 3600, 21600, 216000]);
+    expect(cooldownSeconds(7)).toBe(216000 * 5);
+    expect(cooldownSeconds(8)).toBe(216000 * 25);
+    expect(cooldownSeconds(50)).toBe(365 * 24 * 3600);
+
+    const me = voter();
+    await vote(me, 1, "10.3.8.1");
+    wait(60);
+    expect((await vote(me, 2, "10.3.8.1")).status).toBe(200); // 2nd confirmed rating -> now locked 5 min
+    wait(299);
+    expect((await vote(me, 3, "10.3.8.1")).status).toBe(429);
+    wait(2);
+    expect((await vote(me, 3, "10.3.8.1")).status).toBe(200); // 3rd -> locked 30 min
+    expect((await summary(me)).lockedUntil).toBe(Date.now() + 1800_000);
+  });
+
+  it("re-confirming the same stars is not a change (no longer cooldown)", async () => {
+    const me = voter();
+    await vote(me, 5, "10.3.9.1");
+    wait(61);
+    await vote(me, 5, "10.3.9.1");
+    expect((await summary(me)).lockedUntil).toBeNull();
   });
 
   it("returns the visitor's own rating", async () => {

@@ -404,5 +404,12 @@
       "name": "English",
       "level": "C1 Listening/Writing/Spoken Interaction, C2 Reading, B1 Spoken Production"
     }
-  ]
+  ],
+  "ratingMessages": {
+    "1": "Please let me know if there’s something I need to adjust.",
+    "2": "I really appreciate your time and your rating. Feel free to reach out.",
+    "3": "Thanks for the 3 stars!",
+    "4": "Thanks for the 4 stars, I really appreciate it.",
+    "5": "Thanks for the 5 stars! It means a lot. Please feel free to contact me and explore my 3D room."
+  }
 }

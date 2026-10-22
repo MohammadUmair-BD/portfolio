@@ -51,6 +51,8 @@ export type Profile = {
   education: Education[];
   certifications: Certification[];
   languages: { name: string; level: string }[];
+  /** What a visitor sees after confirming a rating, keyed by stars ("1" to "5"). */
+  ratingMessages: Record<"1" | "2" | "3" | "4" | "5", string>;
 };
 
 /**

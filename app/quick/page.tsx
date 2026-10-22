@@ -63,7 +63,7 @@ export default function QuickView() {
         <section aria-labelledby="rate" className="no-print scroll-mt-20 space-y-3 rounded-2xl border border-line bg-card p-6">
           <h2 id="rate" className="font-display text-xl font-semibold">Rate this portfolio</h2>
           <p className="text-sm text-ink-soft">How did you find it? Ratings are anonymous: no name, email or location.</p>
-          <RatingStars />
+          <RatingStars messages={profile.ratingMessages} />
         </section>
       </main>
 

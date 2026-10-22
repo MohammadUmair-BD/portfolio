@@ -21,7 +21,8 @@ async function db() {
     sql`CREATE TABLE IF NOT EXISTS custom_answers (id SERIAL PRIMARY KEY, keywords TEXT NOT NULL, answer TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
     sql`CREATE TABLE IF NOT EXISTS contact_messages (id SERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, message TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
     // One row per visitor (an anonymous random id from their browser). ip_hash is a salted one-way hash, only used to limit repeat voting.
-    sql`CREATE TABLE IF NOT EXISTS ratings (voter TEXT PRIMARY KEY, stars SMALLINT NOT NULL CHECK (stars BETWEEN 1 AND 5), ip_hash TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
+    // changes = confirmed ratings so far (drives the growing cooldown); locked_until = when they may change it again.
+    sql`CREATE TABLE IF NOT EXISTS ratings (voter TEXT PRIMARY KEY, stars SMALLINT NOT NULL CHECK (stars BETWEEN 1 AND 5), ip_hash TEXT NOT NULL, changes INT NOT NULL DEFAULT 1, locked_until TIMESTAMPTZ, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
   ]).catch((err) => {
     schemaReady = null;
     throw err;
@@ -72,10 +73,13 @@ export async function listContactMessages() {
   return sql`SELECT id, name, email, message, created_at FROM contact_messages ORDER BY created_at DESC LIMIT 200`;
 }
 
-export async function findRating(voter: string): Promise<number | null> {
+export type StoredRating = { stars: number; changes: number; lockedUntil: number | null };
+
+export async function findRating(voter: string): Promise<StoredRating | null> {
   const sql = await db();
-  const rows = (await sql`SELECT stars FROM ratings WHERE voter = ${voter}`) as { stars: number }[];
-  return rows[0]?.stars ?? null;
+  const rows = (await sql`SELECT stars, changes, locked_until FROM ratings WHERE voter = ${voter}`) as { stars: number; changes: number; locked_until: string | Date | null }[];
+  const r = rows[0];
+  return r ? { stars: r.stars, changes: r.changes, lockedUntil: r.locked_until ? new Date(r.locked_until).getTime() : null } : null;
 }
 
 export async function newVotersFromSince(ipHash: string, since: Date): Promise<number> {
@@ -84,10 +88,11 @@ export async function newVotersFromSince(ipHash: string, since: Date): Promise<n
   return rows[0]?.n ?? 0;
 }
 
-export async function saveRating(voter: string, stars: number, ipHash: string) {
+export async function saveRating(voter: string, stars: number, ipHash: string, changes: number, lockedUntil: number) {
   const sql = await db();
-  await sql`INSERT INTO ratings (voter, stars, ip_hash) VALUES (${voter}, ${stars}, ${ipHash})
-    ON CONFLICT (voter) DO UPDATE SET stars = EXCLUDED.stars, updated_at = now()`;
+  const until = new Date(lockedUntil).toISOString();
+  await sql`INSERT INTO ratings (voter, stars, ip_hash, changes, locked_until) VALUES (${voter}, ${stars}, ${ipHash}, ${changes}, ${until})
+    ON CONFLICT (voter) DO UPDATE SET stars = EXCLUDED.stars, changes = EXCLUDED.changes, locked_until = EXCLUDED.locked_until, updated_at = now()`;
 }
 
 export async function ratingDistribution(): Promise<number[]> {
