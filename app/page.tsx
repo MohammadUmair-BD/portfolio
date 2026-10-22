@@ -1,6 +1,8 @@
 import { CatDoodle } from "@/components/CatDoodle";
 import { EntryChoices } from "@/components/EntryChoices";
 import { profile } from "@/lib/profile";
+import { jsonForScript } from "@/lib/security";
+import { personJsonLd } from "@/lib/structured-data";
 
 export default function Home() {
   return (
@@ -10,6 +12,9 @@ export default function Home() {
       <h1 className="mt-1 font-display text-4xl font-semibold tracking-tight sm:text-6xl">{profile.name}</h1>
       <p className="mt-3 text-lg text-ink-soft sm:text-xl">{profile.headline} · {profile.location}</p>
       <EntryChoices catName={profile.site.catName} />
+      {/* Real text on the home page, so search engines (and people) know what this site is about. */}
+      <p className="mt-10 max-w-2xl text-base leading-relaxed text-ink-soft">{profile.summary}</p>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonForScript(personJsonLd()) }} />
     </main>
   );
 }

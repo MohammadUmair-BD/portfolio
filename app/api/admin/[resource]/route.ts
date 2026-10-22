@@ -8,6 +8,7 @@ import {
   listContactMessages,
   listUnanswered,
 } from "@/lib/db";
+import { getDistribution } from "@/lib/ratings";
 import { clean, containsMarkup, readJson } from "@/lib/security";
 
 type Ctx = RouteContext<"/api/admin/[resource]">;
@@ -40,6 +41,7 @@ async function get(request: Request, ctx: Ctx) {
   if (resource === "unanswered") return Response.json(await listUnanswered());
   if (resource === "answers") return Response.json(await getCustomAnswers());
   if (resource === "messages") return Response.json(await listContactMessages());
+  if (resource === "ratings") return Response.json(await getDistribution());
   return Response.json({ error: "Not found" }, { status: 404 });
 }
 

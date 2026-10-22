@@ -3,7 +3,8 @@ import { ExploreShell } from "@/components/explore/ExploreShell";
 import { profile } from "@/lib/profile";
 
 export const metadata: Metadata = {
-  title: "Explore my world",
+  title: "3D Room",
+  alternates: { canonical: "/explore" },
   description: `Step into ${profile.name}'s 3D developer room. ${profile.site.catName} the cat will show you projects, skills, experience and how to get in touch.`,
 };
 

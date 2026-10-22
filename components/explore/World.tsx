@@ -22,6 +22,7 @@ import { Chat } from "./Chat";
 import { Overlay } from "./Overlay";
 import { playKnock, startPurr, stopPurr } from "./purr";
 import { Room } from "./Room";
+import { RatingStars } from "@/components/RatingStars";
 
 type Action = { label: string; onClick: () => void; primary?: boolean };
 type Bubble = { text: string; actions?: Action[] };
@@ -89,6 +90,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
   const bubbleEl = useRef<HTMLDivElement>(null);
   const boardEl = useRef<HTMLDivElement>(null);
   const tagEls = useRef<Partial<Record<ObjectId, HTMLButtonElement | null>>>({});
+  const ratingEl = useRef<HTMLDivElement>(null);
   const penRef = useRef<THREE.Group>(null);
   const doorRef = useRef<THREE.Group>(null);
   const look = useRef<Look>({ yaw: 0, pitch: 0.02 });
@@ -504,7 +506,7 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
           onDoor={knock}
         />
         <Cat brain={brain} onHover={onCatHover} onClick={openChat} />
-        <Behaviors brain={brain} bubbleEl={bubbleEl} canPlay={canPlay} boardEl={boardEl} showBoard={showBoard} tagEls={tagEls} showTags={showTags} />
+        <Behaviors brain={brain} bubbleEl={bubbleEl} canPlay={canPlay} boardEl={boardEl} showBoard={showBoard} tagEls={tagEls} showTags={showTags} ratingEl={ratingEl} />
       </Canvas>
 
       {/* Intro board text: real HTML, stretched over the 3D board by <Behaviors>. */}
@@ -522,6 +524,11 @@ export default function World({ profile, onReady }: { profile: Profile; onReady:
         >
           More about me →
         </button>
+      </div>
+
+      {/* Star rating floating above the intro board, positioned by <Behaviors>. */}
+      <div ref={ratingEl} className="fixed left-0 top-0 z-[7]" style={{ visibility: "hidden" }}>
+        <RatingStars variant="board" />
       </div>
 
       {/* Section headings floating above each object, positioned by <Behaviors>. */}

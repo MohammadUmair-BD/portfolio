@@ -3,7 +3,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { DESK_BOUNDS, DESK_TOP, LAYOUT, TAG_POSITIONS, type ObjectId } from "@/lib/scene-layout";
+import { DESK_BOUNDS, DESK_TOP, LAYOUT, RATING_POSITION, TAG_POSITIONS, type ObjectId } from "@/lib/scene-layout";
 import type { CatBrain } from "./cat-brain";
 
 type Props = {
@@ -18,7 +18,11 @@ type Props = {
   /** Section heading buttons, one per room object. */
   tagEls: React.RefObject<Partial<Record<ObjectId, HTMLButtonElement | null>>>;
   showTags: () => boolean;
+  /** The star rating widget above the intro board. */
+  ratingEl: React.RefObject<HTMLDivElement | null>;
 };
+
+const RATING_ANCHOR = new THREE.Vector3(...RATING_POSITION);
 
 const TAGS = (Object.entries(TAG_POSITIONS) as [ObjectId, [number, number, number]][]).map(([id, p]) => [id, new THREE.Vector3(...p)] as const);
 
@@ -67,7 +71,7 @@ function rectToQuad(w: number, h: number, quad: readonly (readonly [number, numb
 
 const deskPlane =new THREE.Plane(new THREE.Vector3(0, 1, 0), -DESK_TOP);
 
-export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls, showTags }: Props) {
+export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls, showTags, ratingEl }: Props) {
   const { camera, size, raycaster } = useThree();
   const dot = useRef<THREE.Mesh>(null!);
   const s = useMemo(
@@ -133,7 +137,18 @@ export function Behaviors({ brain, bubbleEl, canPlay, boardEl, showBoard, tagEls
       }
     }
 
-    // 4. Laser-dot chase: a fast pointer near the cat on the desk.
+    // 4. Star rating above the board (shown with the headings, i.e. while looking around).
+    const rating = ratingEl.current;
+    if (rating) {
+      s.hit.copy(RATING_ANCHOR).project(camera);
+      const onScreen = tagsOn && s.hit.z < 1 && Math.abs(s.hit.x) < 1.05 && s.hit.y < 1.05 && s.hit.y > -1;
+      rating.style.visibility = onScreen ? "visible" : "hidden";
+      if (onScreen) {
+        rating.style.transform = `translate3d(${(s.hit.x * 0.5 + 0.5) * size.width}px, ${(-s.hit.y * 0.5 + 0.5) * size.height}px, 0) translate(-50%, -100%)`;
+      }
+    }
+
+    // 5. Laser-dot chase: a fast pointer near the cat on the desk.
     const t = state.clock.elapsedTime;
     const moved = s.lastPointer.distanceTo(state.pointer);
     s.lastPointer.copy(state.pointer);

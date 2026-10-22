@@ -2,24 +2,38 @@ import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist } from "next/font/google";
 import { SiteAnalytics } from "@/components/SiteAnalytics";
 import { profile } from "@/lib/profile";
+import { KEYWORDS, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const body = Geist({ variable: "--font-geist", subsets: ["latin"] });
 const display = Fraunces({ variable: "--font-fraunces", subsets: ["latin"] });
 
-const description = `${profile.name}, ${profile.headline} based in ${profile.location}. ${profile.summary}`;
+// Search results show roughly 155 characters of the description, so the key facts come first.
+const title = `${profile.name}: Laravel & PHP Developer in Peshawar, Pakistan`;
+const description = `${profile.name}, ${profile.headline} in ${profile.location}. Laravel, Filament and React/Inertia.js platforms for UAE clients. Available for remote and on-site roles.`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL ?? "http://localhost:3000"),
-  title: { default: `${profile.name} | ${profile.headline}`, template: `%s | ${profile.name}` },
+  metadataBase: new URL(siteUrl()),
+  title: { default: title, template: `%s | ${profile.name}, Laravel Developer` },
   description,
+  keywords: KEYWORDS,
+  authors: [{ name: profile.name, url: siteUrl() }],
+  creator: profile.name,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "profile",
-    title: `${profile.name} | ${profile.headline}`,
+    url: "/",
+    title,
     description,
     siteName: `${profile.name} Portfolio`,
+    locale: "en_US",
+    firstName: profile.name.split(" ")[0],
+    lastName: profile.name.split(" ").slice(1).join(" "),
   },
-  twitter: { card: "summary", title: profile.name, description },
+  twitter: { card: "summary_large_image", title, description },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  // Google Search Console "HTML tag" verification: paste only the content="…" value into this env var.
+  ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
 };
 
 export const viewport: Viewport = {

@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [unanswered, setUnanswered] = useState<Unanswered[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [ratings, setRatings] = useState<number[]>([0, 0, 0, 0, 0]);
   const [form, setForm] = useState({ keywords: "", answer: "" });
 
   const api = useCallback(async (path: string, init: RequestInit = {}, pw = password) => {
@@ -32,8 +33,8 @@ export default function AdminPage() {
 
   const load = useCallback(async (pw = password) => {
     try {
-      const [u, a, m] = await Promise.all([api("unanswered", {}, pw), api("answers", {}, pw), api("messages", {}, pw)]);
-      setUnanswered(u); setAnswers(a); setMessages(m);
+      const [u, a, m, r] = await Promise.all([api("unanswered", {}, pw), api("answers", {}, pw), api("messages", {}, pw), api("ratings", {}, pw)]);
+      setUnanswered(u); setAnswers(a); setMessages(m); setRatings(r ?? [0, 0, 0, 0, 0]);
       setPassword(pw); setAuthed(true); setError(""); write(pw);
     } catch (e) {
       setAuthed(false); setError((e as Error).message); write("");
@@ -72,6 +73,8 @@ export default function AdminPage() {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className={`mt-1 ${input}`} autoComplete="current-password" required />
           </label>
           {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+
+      <RatingsCard ratings={ratings} />
           <button className="rounded-full bg-ink px-5 py-2 font-medium text-paper">Sign in</button>
         </form>
       </main>
@@ -85,6 +88,8 @@ export default function AdminPage() {
         <button className="ml-auto text-sm underline" onClick={() => { write(""); setAuthed(false); setPassword(""); }}>Sign out</button>
       </header>
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+
+      <RatingsCard ratings={ratings} />
 
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Questions the cat couldn&apos;t answer ({unanswered.length})</h2>
@@ -145,5 +150,30 @@ export default function AdminPage() {
         <p>Your profile lives in <code>data/profile.json</code>. Edit it (or rerun <code>npm run resume:pdf</code> after editing), commit and push. Vercel redeploys on its own.</p>
       </section>
     </main>
+  );
+}
+
+function RatingsCard({ ratings }: { ratings: number[] }) {
+  const count = ratings.reduce((a, b) => a + b, 0);
+  const average = count ? ratings.reduce((sum, n, i) => sum + n * (i + 1), 0) / count : 0;
+  const max = Math.max(1, ...ratings);
+  return (
+    <section className="space-y-3">
+      <h2 className="text-xl font-semibold">Ratings</h2>
+      <p className="text-sm text-ink-soft">
+        {count ? `${average.toFixed(2)} average from ${count} rating${count === 1 ? "" : "s"}.` : "No ratings yet."} Visitors see the average once 3 people have rated.
+      </p>
+      <ul className="space-y-1.5 rounded-xl border border-line bg-card p-4 text-sm">
+        {[5, 4, 3, 2, 1].map((stars) => (
+          <li key={stars} className="flex items-center gap-3">
+            <span className="w-8 text-right">{stars}★</span>
+            <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-paper-2">
+              <span className="block h-full rounded-full bg-[#f2b544]" style={{ width: `${(ratings[stars - 1] / max) * 100}%` }} />
+            </span>
+            <span className="w-8 text-ink-soft">{ratings[stars - 1]}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

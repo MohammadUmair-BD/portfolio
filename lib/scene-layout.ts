@@ -100,6 +100,9 @@ export const TAG_POSITIONS: Record<ObjectId, Vec3> = {
   resume: [LAYOUT.resume[0], DESK_TOP + 0.28, LAYOUT.resume[2]],
 };
 
+/** The star rating floats just above the intro board (bottom-centre of the widget). */
+export const RATING_POSITION: Vec3 = [LAYOUT.board.center[0], LAYOUT.board.center[1] + LAYOUT.board.height / 2 + 0.18, LAYOUT.board.center[2] + 0.05];
+
 export const SECTION_LABELS: Record<SectionId, string> = {
   projects: "Projects",
   skills: "Skills",

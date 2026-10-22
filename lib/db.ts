@@ -20,6 +20,8 @@ async function db() {
     sql`CREATE TABLE IF NOT EXISTS unanswered_questions (id SERIAL PRIMARY KEY, question TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
     sql`CREATE TABLE IF NOT EXISTS custom_answers (id SERIAL PRIMARY KEY, keywords TEXT NOT NULL, answer TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
     sql`CREATE TABLE IF NOT EXISTS contact_messages (id SERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, message TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
+    // One row per visitor (an anonymous random id from their browser). ip_hash is a salted one-way hash, only used to limit repeat voting.
+    sql`CREATE TABLE IF NOT EXISTS ratings (voter TEXT PRIMARY KEY, stars SMALLINT NOT NULL CHECK (stars BETWEEN 1 AND 5), ip_hash TEXT NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT now(), updated_at TIMESTAMPTZ NOT NULL DEFAULT now())`,
   ]).catch((err) => {
     schemaReady = null;
     throw err;
@@ -68,4 +70,30 @@ export async function saveContactMessage(name: string, email: string, message: s
 export async function listContactMessages() {
   const sql = await db();
   return sql`SELECT id, name, email, message, created_at FROM contact_messages ORDER BY created_at DESC LIMIT 200`;
+}
+
+export async function findRating(voter: string): Promise<number | null> {
+  const sql = await db();
+  const rows = (await sql`SELECT stars FROM ratings WHERE voter = ${voter}`) as { stars: number }[];
+  return rows[0]?.stars ?? null;
+}
+
+export async function newVotersFromSince(ipHash: string, since: Date): Promise<number> {
+  const sql = await db();
+  const rows = (await sql`SELECT count(*)::int AS n FROM ratings WHERE ip_hash = ${ipHash} AND created_at > ${since.toISOString()}`) as { n: number }[];
+  return rows[0]?.n ?? 0;
+}
+
+export async function saveRating(voter: string, stars: number, ipHash: string) {
+  const sql = await db();
+  await sql`INSERT INTO ratings (voter, stars, ip_hash) VALUES (${voter}, ${stars}, ${ipHash})
+    ON CONFLICT (voter) DO UPDATE SET stars = EXCLUDED.stars, updated_at = now()`;
+}
+
+export async function ratingDistribution(): Promise<number[]> {
+  const sql = await db();
+  const rows = (await sql`SELECT stars, count(*)::int AS n FROM ratings GROUP BY stars`) as { stars: number; n: number }[];
+  const dist = [0, 0, 0, 0, 0];
+  for (const r of rows) dist[r.stars - 1] = r.n;
+  return dist;
 }

@@ -3,13 +3,16 @@ import Link from "next/link";
 import { About, Contact, Projects, ResumeButton, SectionHeading, Skills, Timeline } from "@/components/sections/Sections";
 import { BackToTop } from "@/components/BackToTop";
 import { FallbackNotice } from "@/components/FallbackNotice";
+import { RatingStars } from "@/components/RatingStars";
 import { profile } from "@/lib/profile";
 import { jsonForScript } from "@/lib/security";
+import { personJsonLd } from "@/lib/structured-data";
 
 export const metadata: Metadata = {
-  title: "Quick view",
-  description: `${profile.name}'s resume at a glance: ${profile.headline}. Experience, projects, skills and contact details.`,
+  title: "Resume",
+  description: `${profile.name}'s resume: ${profile.headline} in ${profile.location}. Laravel, Filament, React/Inertia.js and WordPress projects for UAE clients, skills, experience and contact details.`,
   alternates: { canonical: "/quick" },
+  openGraph: { url: "/quick" },
 };
 
 const SECTIONS = [
@@ -21,15 +24,7 @@ const SECTIONS = [
 ];
 
 export default function QuickView() {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: profile.name,
-    jobTitle: profile.headline,
-    email: `mailto:${profile.email}`,
-    address: { "@type": "PostalAddress", addressLocality: profile.location },
-    sameAs: Object.values(profile.links).filter(Boolean),
-  };
+  const jsonLd = personJsonLd();
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-24 sm:px-6">
@@ -65,6 +60,11 @@ export default function QuickView() {
         <section aria-labelledby="projects" className="scroll-mt-20 space-y-4"><SectionHeading id="projects">Projects</SectionHeading><Projects profile={profile} /></section>
         <section aria-labelledby="skills" className="scroll-mt-20 space-y-4"><SectionHeading id="skills">Skills</SectionHeading><Skills profile={profile} /></section>
         <section aria-labelledby="contact" className="scroll-mt-20 space-y-4"><SectionHeading id="contact">Contact</SectionHeading><Contact profile={profile} /></section>
+        <section aria-labelledby="rate" className="no-print scroll-mt-20 space-y-3 rounded-2xl border border-line bg-card p-6">
+          <h2 id="rate" className="font-display text-xl font-semibold">Rate this portfolio</h2>
+          <p className="text-sm text-ink-soft">How did you find it? Ratings are anonymous: no name, email or location.</p>
+          <RatingStars />
+        </section>
       </main>
 
       <BackToTop topId="top" desktopAfterId="intro" phoneAfterId="about-section" />
