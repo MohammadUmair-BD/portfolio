@@ -29,7 +29,7 @@ export function personJsonLd() {
         email: `mailto:${profile.email}`,
         ...(profile.phone ? { telephone: profile.phone } : {}),
         address: { "@type": "PostalAddress", addressLocality: "Peshawar", addressCountry: "PK" },
-        sameAs: Object.values(profile.links).filter(Boolean),
+        sameAs: [profile.links.linkedin, profile.links.github].filter(Boolean), // other profiles of the same person
         knowsAbout: profile.skills.filter((s) => s.category !== "familiar").map((s) => s.name),
         knowsLanguage: profile.languages.map((l) => l.name),
         alumniOf: profile.education.map((e) => ({ "@type": "CollegeOrUniversity", name: e.institution })),

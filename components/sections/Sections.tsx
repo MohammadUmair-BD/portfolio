@@ -164,7 +164,6 @@ export function ContactLinks({ profile }: P) {
     profile.phone && { label: "Phone", value: profile.phone, href: `tel:${profile.phone.replace(/[^\d+]/g, "")}` },
     profile.links.linkedin && { label: "LinkedIn", value: "Mohammad Umair", href: profile.links.linkedin },
     profile.links.github && { label: "GitHub", value: "GitHub profile", href: profile.links.github },
-    profile.links.website && { label: "Website", value: profile.links.website, href: profile.links.website },
   ].filter(Boolean) as { label: string; value: string; href: string }[];
   return (
     <ul className="space-y-2">
